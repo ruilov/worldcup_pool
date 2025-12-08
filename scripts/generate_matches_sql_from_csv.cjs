@@ -130,6 +130,7 @@ function buildMatchesSql(rows) {
   lines.push('  -- Insert matches from CSV')
   lines.push('  insert into public.matches (')
   lines.push('    challenge_id,')
+  lines.push('    match_number,')
   lines.push('    team1_name,')
   lines.push('    team2_name,')
   lines.push('    kickoff_at,')
@@ -140,6 +141,7 @@ function buildMatchesSql(rows) {
     const isLast = idx === rows.length - 1
     const valuesSql = [
       'v_challenge_id',
+      row.matchNumber,
       sqlString(row.team1Name),
       sqlString(row.team2Name),
       row.kickoffTs

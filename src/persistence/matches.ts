@@ -11,6 +11,7 @@ import type { Match, MatchStatus } from '../domain/types';
 interface MatchRow {
   id: string;
   challenge_id: string;
+  match_number: number;
   team1_name: string;
   team2_name: string;
   kickoff_at: string | null;
@@ -28,6 +29,7 @@ function rowToMatch(row: MatchRow): Match {
   return {
     id: row.id,
     challengeId: row.challenge_id,
+    matchNumber: row.match_number,
     team1Name: row.team1_name,
     team2Name: row.team2_name,
     kickoffAt: row.kickoff_at ? new Date(row.kickoff_at) : null,
@@ -43,7 +45,7 @@ function rowToMatch(row: MatchRow): Match {
  * Load all matches for a challenge.
  *
  * @param challengeId - The challenge ID
- * @returns Array of matches, ordered by kickoff time
+ * @returns Array of matches, ordered by match number
  * @throws Error if database query fails
  */
 export async function loadMatches(challengeId: string): Promise<Match[]> {
@@ -51,7 +53,7 @@ export async function loadMatches(challengeId: string): Promise<Match[]> {
     .from('matches')
     .select('*')
     .eq('challenge_id', challengeId)
-    .order('kickoff_at', { ascending: true });
+    .order('match_number', { ascending: true });
 
   if (error) {
     console.error('Error loading matches:', error);

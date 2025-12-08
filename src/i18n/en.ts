@@ -54,6 +54,7 @@ const en = {
     errorPrefix: 'Error',
     noMatches: 'No matches found for this challenge.',
     noChallengeFound: 'No default challenge found. Please check your database setup.',
+    tableHeaderMatch: '#',
     tableHeaderTeams: 'Teams',
     tableHeaderKickoff: 'Kickoff',
     tableHeaderStatus: 'Status',

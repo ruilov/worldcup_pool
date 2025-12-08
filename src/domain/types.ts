@@ -37,6 +37,7 @@ export interface Challenge {
 export interface Match {
   id: string;
   challengeId: string;
+  matchNumber: number; // Official match number (e.g., 1-104)
   team1Name: string;
   team2Name: string;
   kickoffAt: Date | null;

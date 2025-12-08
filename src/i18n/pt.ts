@@ -54,6 +54,7 @@ const pt = {
     errorPrefix: 'Erro',
     noMatches: 'Nenhuma partida encontrada para este desafio.',
     noChallengeFound: 'Desafio padrão não encontrado. Verifique a configuração do banco de dados.',
+    tableHeaderMatch: '#',
     tableHeaderTeams: 'Times',
     tableHeaderKickoff: 'Início',
     tableHeaderStatus: 'Status',

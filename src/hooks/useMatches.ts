@@ -17,6 +17,8 @@ import {
  */
 export interface MatchViewModel {
   id: string;
+  matchNumber: number; // Official match number
+  matchNumberDisplay: string; // "#42"
   teamsDisplay: string; // "Brazil vs Morocco"
   kickoffAt: Date | null;
   kickoffDisplay: string; // Formatted kickoff time or "TBD"
@@ -72,6 +74,8 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
       const now = new Date();
       const viewModels: MatchViewModel[] = rawMatches.map((match) => ({
         id: match.id,
+        matchNumber: match.matchNumber,
+        matchNumberDisplay: `#${match.matchNumber}`,
         teamsDisplay: formatMatchTeams(match),
         kickoffAt: match.kickoffAt,
         kickoffDisplay: match.kickoffAt

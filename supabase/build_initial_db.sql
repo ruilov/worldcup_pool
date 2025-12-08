@@ -109,6 +109,7 @@ create table if not exists public.challenge_entries (
 create table if not exists public.matches (
   id           uuid primary key default gen_random_uuid(),
   challenge_id uuid not null references public.challenges (id) on delete cascade,
+  match_number integer not null,                -- official match number (e.g., 1-104)
   team1_name   text not null,                   -- localized/pretty name
   team2_name   text not null,
   kickoff_at   timestamptz,                     -- optional scheduling info

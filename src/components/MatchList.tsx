@@ -30,6 +30,7 @@ export function MatchList({ challengeId }: MatchListProps) {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ borderBottom: '2px solid #ccc' }}>
+            <th style={{ textAlign: 'center', padding: '8px', width: '60px' }}>{t('matches.tableHeaderMatch')}</th>
             <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderTeams')}</th>
             <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderKickoff')}</th>
             <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderStatus')}</th>
@@ -43,6 +44,9 @@ export function MatchList({ challengeId }: MatchListProps) {
               key={match.id}
               style={{ borderBottom: '1px solid #eee' }}
             >
+              <td style={{ textAlign: 'center', padding: '8px', color: '#666', fontSize: '0.9em' }}>
+                {match.matchNumberDisplay}
+              </td>
               <td style={{ padding: '8px' }}>{match.teamsDisplay}</td>
               <td style={{ padding: '8px', fontSize: '0.9em' }}>
                 {match.kickoffDisplay}
