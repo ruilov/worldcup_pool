@@ -123,4 +123,5 @@ begin
     (v_challenge_id, 'Loser of Match 101', 'Loser of Match 102', '2026-07-18 17:00:00-04'::timestamptz, 'scheduled'::match_status),
     (v_challenge_id, 'Winner of Match 101', 'Winner of Match 102', '2026-07-19 15:00:00-04'::timestamptz, 'scheduled'::match_status);
 
-end $$;
+end;
+$$;
