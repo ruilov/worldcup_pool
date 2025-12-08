@@ -36,6 +36,16 @@ const pt = {
     removedFromGameLabel: 'Removido do jogo',
     payoutsSectionTitle: 'Pagamentos',
     noResults: 'Nenhum resultado ainda. Preencha os dados e calcule.',
+    team1Label: 'Time 1',
+    team2Label: 'Time 2',
+    team1GoalsLabel: 'Gols do Time 1',
+    team2GoalsLabel: 'Gols do Time 2',
+    contractTypeLabel: 'Tipo de contrato',
+    contractTypeWinner: 'Vencedor',
+    contractTypeGoalDifference: 'Saldo de gols',
+    contractTypeScore: 'Placar exato',
+    derivedOutcomeLabel: 'Resultado derivado',
+    derivedOutcomeValue: '{{contractType}}: {{outcome}}',
   },
 }
 

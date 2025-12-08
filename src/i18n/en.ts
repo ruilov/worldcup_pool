@@ -36,6 +36,16 @@ const en = {
     removedFromGameLabel: 'Removed from game',
     payoutsSectionTitle: 'Payouts',
     noResults: 'No results yet. Enter data and calculate.',
+    team1Label: 'Team 1',
+    team2Label: 'Team 2',
+    team1GoalsLabel: 'Team 1 goals',
+    team2GoalsLabel: 'Team 2 goals',
+    contractTypeLabel: 'Contract type',
+    contractTypeWinner: 'Winner',
+    contractTypeGoalDifference: 'Goal difference',
+    contractTypeScore: 'Score',
+    derivedOutcomeLabel: 'Derived outcome',
+    derivedOutcomeValue: '{{contractType}}: {{outcome}}',
   },
 }
 

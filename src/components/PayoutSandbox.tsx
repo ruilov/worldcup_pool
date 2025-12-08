@@ -5,8 +5,14 @@ import {
   type Bet,
   type ContractPayoutResult,
 } from '../lib/contractPayouts'
+import {
+  getAllContractOutcomes,
+  type ContractOutcomes,
+  type SimpleScore,
+} from '../lib/contractOutcomes'
 
 type BetRow = Bet & { id: string }
+type ContractType = 'winner' | 'goalDifference' | 'score'
 
 const initialBets: BetRow[] = [
   { id: 'alice', playerId: 'Alice', outcome: 'Brazil', stake: 10 },
@@ -18,10 +24,15 @@ const initialBets: BetRow[] = [
 export function PayoutSandbox() {
   const { t } = useTranslation()
   const [blind, setBlind] = useState<number>(30)
-  const [winningOutcome, setWinningOutcome] = useState<string>('Brazil')
   const [bets, setBets] = useState<BetRow[]>(initialBets)
   const [result, setResult] = useState<ContractPayoutResult | null>(null)
   const [idCounter, setIdCounter] = useState<number>(0)
+  const [team1Label, setTeam1Label] = useState<string>('Brazil')
+  const [team2Label, setTeam2Label] = useState<string>('Morocco')
+  const [team1Goals, setTeam1Goals] = useState<string>('2')
+  const [team2Goals, setTeam2Goals] = useState<string>('1')
+  const [contractType, setContractType] = useState<ContractType>('winner')
+  const [invalidScore, setInvalidScore] = useState<boolean>(false)
 
   const handleBetChange = (id: string, field: keyof Bet, value: string) => {
     setBets(current =>
@@ -55,6 +66,32 @@ export function PayoutSandbox() {
   }
 
   const handleCalculate = () => {
+    const parsedTeam1Goals = Number(team1Goals)
+    const parsedTeam2Goals = Number(team2Goals)
+    const hasInvalidGoals =
+      Number.isNaN(parsedTeam1Goals) || Number.isNaN(parsedTeam2Goals)
+    setInvalidScore(hasInvalidGoals)
+    if (hasInvalidGoals) {
+      setResult(null)
+      return
+    }
+
+    const score: SimpleScore = {
+      team1Goals: parsedTeam1Goals,
+      team2Goals: parsedTeam2Goals,
+    }
+    const outcomes: ContractOutcomes = getAllContractOutcomes(
+      score,
+      team1Label,
+      team2Label,
+    )
+    const winningOutcome =
+      contractType === 'winner'
+        ? outcomes.winnerOutcome
+        : contractType === 'goalDifference'
+          ? outcomes.goalDifferenceOutcome
+          : outcomes.scoreOutcome
+
     const inputBets: Bet[] = bets
       .filter(bet => bet.stake > 0)
       .map(({ id: _id, ...rest }) => rest)
@@ -94,13 +131,71 @@ export function PayoutSandbox() {
         {t('sandbox.description')}
       </p>
 
-    <section style={{ marginBottom: '1.25rem' }}>
-      <h2 style={{ marginBottom: '0.5rem' }}>
-        {t('sandbox.parametersSectionTitle')}
-      </h2>
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span>{t('sandbox.blindLabel')}</span>
+      <section style={{ marginBottom: '1.25rem' }}>
+        <h2 style={{ marginBottom: '0.5rem' }}>
+          {t('sandbox.parametersSectionTitle')}
+        </h2>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '1rem',
+          }}
+        >
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.team1Label')}</span>
+            <input
+              type="text"
+              value={team1Label}
+              onChange={e => setTeam1Label(e.target.value)}
+              style={{ padding: '0.5rem' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.team2Label')}</span>
+            <input
+              type="text"
+              value={team2Label}
+              onChange={e => setTeam2Label(e.target.value)}
+              style={{ padding: '0.5rem' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.team1GoalsLabel')}</span>
+            <input
+              type="number"
+              value={team1Goals}
+              onChange={e => setTeam1Goals(e.target.value)}
+              style={{ padding: '0.5rem' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.team2GoalsLabel')}</span>
+            <input
+              type="number"
+              value={team2Goals}
+              onChange={e => setTeam2Goals(e.target.value)}
+              style={{ padding: '0.5rem' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.contractTypeLabel')}</span>
+            <select
+              value={contractType}
+              onChange={e =>
+                setContractType(e.target.value as ContractType)
+              }
+              style={{ padding: '0.5rem' }}
+            >
+              <option value="winner">{t('sandbox.contractTypeWinner')}</option>
+              <option value="goalDifference">
+                {t('sandbox.contractTypeGoalDifference')}
+              </option>
+              <option value="score">{t('sandbox.contractTypeScore')}</option>
+            </select>
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span>{t('sandbox.blindLabel')}</span>
             <input
               type="number"
               min={0}
@@ -109,17 +204,17 @@ export function PayoutSandbox() {
               style={{ padding: '0.5rem', minWidth: 160 }}
             />
           </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span>{t('sandbox.winningOutcomeLabel')}</span>
-            <input
-              type="text"
-              value={winningOutcome}
-              onChange={e => setWinningOutcome(e.target.value)}
-              style={{ padding: '0.5rem', minWidth: 200 }}
-            />
-          </label>
         </div>
       </section>
+
+      <DerivedOutcomeDisplay
+        contractType={contractType}
+        team1Label={team1Label}
+        team2Label={team2Label}
+        team1Goals={team1Goals}
+        team2Goals={team2Goals}
+        invalidScore={invalidScore}
+      />
 
       <section style={{ marginBottom: '1.25rem' }}>
         <h2 style={{ marginBottom: '0.5rem' }}>
@@ -150,7 +245,9 @@ export function PayoutSandbox() {
               <input
                 type="text"
                 value={bet.outcome}
-                onChange={e => handleBetChange(bet.id, 'outcome', e.target.value)}
+                onChange={e =>
+                  handleBetChange(bet.id, 'outcome', e.target.value)
+                }
                 style={{ padding: '0.5rem' }}
               />
               <input
@@ -193,7 +290,8 @@ export function PayoutSandbox() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div>
-              <strong>{t('sandbox.totalWageredLabel')}:</strong> {result.totalWagered}
+              <strong>{t('sandbox.totalWageredLabel')}:</strong>{' '}
+              {result.totalWagered}
             </div>
             <div>
               <strong>{t('sandbox.totalPotLabel')}:</strong> {result.totalPot}
@@ -232,6 +330,66 @@ export function PayoutSandbox() {
           </div>
         )}
       </section>
+    </div>
+  )
+}
+
+type DerivedOutcomeDisplayProps = {
+  contractType: ContractType
+  team1Label: string
+  team2Label: string
+  team1Goals: string
+  team2Goals: string
+  invalidScore: boolean
+}
+
+function DerivedOutcomeDisplay({
+  contractType,
+  team1Goals,
+  team2Goals,
+  team1Label,
+  team2Label,
+  invalidScore,
+}: DerivedOutcomeDisplayProps) {
+  const { t } = useTranslation()
+  const parsedTeam1Goals = Number(team1Goals)
+  const parsedTeam2Goals = Number(team2Goals)
+  const hasInvalidGoals =
+    invalidScore ||
+    Number.isNaN(parsedTeam1Goals) ||
+    Number.isNaN(parsedTeam2Goals)
+
+  let outcomeLabel = ''
+  if (!hasInvalidGoals) {
+    const score: SimpleScore = {
+      team1Goals: parsedTeam1Goals,
+      team2Goals: parsedTeam2Goals,
+    }
+    const outcomes = getAllContractOutcomes(score, team1Label, team2Label)
+    const selectedOutcome =
+      contractType === 'winner'
+        ? outcomes.winnerOutcome
+        : contractType === 'goalDifference'
+          ? outcomes.goalDifferenceOutcome
+          : outcomes.scoreOutcome
+
+    const contractLabel =
+      contractType === 'winner'
+        ? t('sandbox.contractTypeWinner')
+        : contractType === 'goalDifference'
+          ? t('sandbox.contractTypeGoalDifference')
+          : t('sandbox.contractTypeScore')
+
+    outcomeLabel = t('sandbox.derivedOutcomeValue', {
+      contractType: contractLabel,
+      outcome: selectedOutcome,
+    })
+  }
+
+  return (
+    <div style={{ marginBottom: '1rem', padding: '0.75rem 0' }}>
+      <strong>{t('sandbox.derivedOutcomeLabel')}:</strong>{' '}
+      {hasInvalidGoals ? t('sandbox.noResults') : outcomeLabel}
     </div>
   )
 }
