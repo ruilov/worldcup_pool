@@ -1,0 +1,105 @@
+﻿MatchID,team1_name,team2_name,kickoff_at
+1,Mexico,South Africa,6/11/26 15:00
+2,South Korea,UEFA playoff D winner,6/11/26 22:00
+3,Canada,UEFA playoff A winner,6/12/26 15:00
+4,United States,Paraguay,6/12/26 21:00
+5,Qatar,Switzerland,6/13/26 15:00
+6,Brazil,Morocco,6/13/26 18:00
+7,Haiti,Scotland,6/13/26 21:00
+8,Australia,UEFA playoff C winner,6/14/26 0:00
+9,Germany,Curacao,6/14/26 13:00
+10,Netherlands,Japan,6/14/26 16:00
+11,Ivory Coast,Ecuador,6/14/26 19:00
+12,UEFA playoff B winner,Tunisia,6/14/26 22:00
+13,Spain,Cape Verde,6/15/26 12:00
+14,Belgium,Egypt,6/15/26 15:00
+15,Saudi Arabia,Uruguay,6/15/26 18:00
+16,Iran,New Zealand,6/15/26 21:00
+17,France,Senegal,6/16/26 15:00
+18,Inter-confederation playoff 2 winner,Norway,6/16/26 18:00
+19,Argentina,Algeria,6/16/26 21:00
+20,Austria,Jordan,6/17/26 0:00
+21,Portugal,Inter-confederation playoff 1 winner,6/17/26 13:00
+22,England,Croatia,6/17/26 16:00
+23,Ghana,Panama,6/17/26 19:00
+24,Uzbekistan,Colombia,6/17/26 22:00
+25,UEFA playoff D winner,South Africa,6/18/26 12:00
+26,Switzerland,UEFA playoff A winner,6/18/26 15:00
+27,Canada,Qatar,6/18/26 18:00
+28,Mexico,South Korea,6/18/26 21:00
+29,United States,Australia,6/19/26 15:00
+30,Scotland,Morocco,6/19/26 18:00
+31,Brazil,Haiti,6/19/26 21:00
+32,UEFA playoff C winner,Paraguay,6/20/26 0:00
+33,Netherlands,UEFA playoff B winner,6/20/26 13:00
+34,Germany,Ivory Coast,6/20/26 16:00
+35,Ecuador,Curacao,6/20/26 20:00
+36,Tunisia,Japan,6/21/26 0:00
+37,Spain,Saudi Arabia,6/21/26 12:00
+38,Belgium,Iran,6/21/26 15:00
+39,Uruguay,Cape Verde,6/21/26 18:00
+40,New Zealand,Egypt,6/21/26 21:00
+41,Argentina,Austria,6/22/26 13:00
+42,France,Inter-confederation playoff 2 winner,6/22/26 17:00
+43,Norway,Senegal,6/22/26 20:00
+44,Jordan,Algeria,6/22/26 23:00
+45,Portugal,Uzbekistan,6/23/26 13:00
+46,England,Ghana,6/23/26 16:00
+47,Panama,Croatia,6/23/26 19:00
+48,Colombia,Inter-confederation playoff 1 winner,6/23/26 22:00
+49,Switzerland,Canada,6/24/26 15:00
+50,UEFA playoff A winner,Qatar,6/24/26 15:00
+51,Scotland,Brazil,6/24/26 18:00
+52,Morocco,Haiti,6/24/26 18:00
+53,UEFA playoff D winner,Mexico,6/24/26 21:00
+54,South Africa,South Korea,6/24/26 21:00
+55,Ecuador,Germany,6/25/26 16:00
+56,Curacao,Ivory Coast,6/25/26 16:00
+57,Japan,UEFA playoff B winner,6/25/26 19:00
+58,Tunisia,Netherlands,6/25/26 19:00
+59,UEFA playoff C winner,United States,6/25/26 22:00
+60,Paraguay,Australia,6/25/26 22:00
+61,Norway,France,6/26/26 15:00
+62,Senegal,Inter-confederation playoff 2 winner,6/26/26 15:00
+63,Cape Verde,Saudi Arabia,6/26/26 20:00
+64,Uruguay,Spain,6/26/26 20:00
+65,Egypt,Iran,6/26/26 23:00
+66,New Zealand,Belgium,6/26/26 23:00
+67,Panama,England,6/27/26 17:00
+68,Croatia,Ghana,6/27/26 17:00
+69,Colombia,Portugal,6/27/26 19:30
+70,Inter-confederation playoff 1 winner,Uzbekistan,6/27/26 19:30
+70,Group A winner,Third place from Groups C/E/F/H/I,6/30/26 21:00
+71,Algeria,Austria,6/27/26 22:00
+72,Jordan,Argentina,6/27/26 22:00
+73,Group A runner-up,Group B runner-up,6/28/26 15:00
+74,Group E winner,Third place from Groups A/B/C/D/F,6/29/26 16:30
+75,Group F winner,Group C runner-up,6/29/26 21:00
+76,Group C winner,Group F runner-up,6/29/26 13:00
+77,Group I winner,Third place from Groups C/D/F/G/H,6/30/26 17:00
+78,Group E runner-up,Group I runner-up,6/30/26 13:00
+80,Group L winner,Third place from Groups E/H/I/J/K,7/1/26 12:00
+81,Group D winner,Third place from Groups B/E/F/I/J,7/1/26 20:00
+82,Group G winner,Third place from Groups A/E/H/I/J,7/1/26 16:00
+83,Group K runner-up,Group L runner-up,7/2/26 19:00
+84,Group H winner,Group J runner-up,7/2/26 15:00
+85,Group B winner,Third place from Groups E/F/G/I/J,7/2/26 23:00
+86,Group J winner,Group H runner-up,7/3/26 18:00
+87,Group K winner,Third place from Groups D/E/I/J/L,7/3/26 21:30
+88,Group D runner-up,Group G runner-up,7/3/26 14:00
+89,Winner of Match 74,Winner of Match 77,7/4/26 17:00
+90,Winner of Match 73,Winner of Match 75,7/4/26 13:00
+91,Winner of Match 76,Winner of Match 78,7/5/26 16:00
+92,Winner of Match 79,Winner of Match 80,7/5/26 20:00
+93,Winner of Match 83,Winner of Match 84,7/6/26 15:00
+94,Winner of Match 81,Winner of Match 82,7/6/26 20:00
+95,Winner of Match 86,Winner of Match 88,7/7/26 12:00
+96,Winner of Match 85,Winner of Match 87,7/7/26 16:00
+97,Winner of Match 89,Winner of Match 90,7/9/26 16:00
+98,Winner of Match 93,Winner of Match 94,7/10/26 15:00
+99,Winner of Match 91,Winner of Match 92,7/11/26 17:00
+100,Winner of Match 95,Winner of Match 96,7/11/26 21:00
+101,Winner of Match 97,Winner of Match 98,7/14/26 15:00
+102,Winner of Match 99,Winner of Match 100,7/15/26 15:00
+103,Loser of Match 101,Loser of Match 102,7/18/26 17:00
+104,Winner of Match 101,Winner of Match 102,7/19/26 15:00
