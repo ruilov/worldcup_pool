@@ -47,6 +47,26 @@ const pt = {
     derivedOutcomeLabel: 'Resultado derivado',
     derivedOutcomeValue: '{{contractType}}: {{outcome}}',
   },
+  matches: {
+    heading: 'Partidas',
+    loading: 'Carregando partidas...',
+    loadingChallenge: 'Carregando desafio...',
+    errorPrefix: 'Erro',
+    noMatches: 'Nenhuma partida encontrada para este desafio.',
+    noChallengeFound: 'Desafio padrão não encontrado. Verifique a configuração do banco de dados.',
+    tableHeaderTeams: 'Times',
+    tableHeaderKickoff: 'Início',
+    tableHeaderStatus: 'Status',
+    tableHeaderScore: 'Placar',
+    tableHeaderLocked: 'Bloqueado',
+    kickoffTBD: 'A definir',
+    statusScheduled: 'agendado',
+    statusInProgress: 'em andamento',
+    statusCompleted: 'finalizado',
+    statusVoid: 'cancelado',
+    challengeNotFound: 'Desafio não encontrado',
+    failedToLoadMatches: 'Falha ao carregar partidas',
+  },
 }
 
 export default pt

@@ -47,6 +47,26 @@ const en = {
     derivedOutcomeLabel: 'Derived outcome',
     derivedOutcomeValue: '{{contractType}}: {{outcome}}',
   },
+  matches: {
+    heading: 'Matches',
+    loading: 'Loading matches...',
+    loadingChallenge: 'Loading challenge...',
+    errorPrefix: 'Error',
+    noMatches: 'No matches found for this challenge.',
+    noChallengeFound: 'No default challenge found. Please check your database setup.',
+    tableHeaderTeams: 'Teams',
+    tableHeaderKickoff: 'Kickoff',
+    tableHeaderStatus: 'Status',
+    tableHeaderScore: 'Score',
+    tableHeaderLocked: 'Locked',
+    kickoffTBD: 'TBD',
+    statusScheduled: 'scheduled',
+    statusInProgress: 'in progress',
+    statusCompleted: 'completed',
+    statusVoid: 'void',
+    challengeNotFound: 'Challenge not found',
+    failedToLoadMatches: 'Failed to load matches',
+  },
 }
 
 export default en

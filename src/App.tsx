@@ -5,7 +5,7 @@ import { MatchList } from './components/MatchList'
 import { useDefaultChallenge } from './hooks/useDefaultChallenge'
 
 function App() {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { challenge, loading: challengeLoading } = useDefaultChallenge()
 
   const handleLanguageChange = (lang: string) => {
@@ -27,7 +27,7 @@ function App() {
       />
 
       {challengeLoading ? (
-        <div>Loading challenge...</div>
+        <div>{t('matches.loadingChallenge')}</div>
       ) : challenge ? (
         <>
           <MatchList challengeId={challenge.id} />
@@ -36,7 +36,7 @@ function App() {
           </div>
         </>
       ) : (
-        <div>No default challenge found. Please check your database setup.</div>
+        <div>{t('matches.noChallengeFound')}</div>
       )}
     </div>
   )

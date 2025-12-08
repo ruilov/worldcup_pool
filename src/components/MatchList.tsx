@@ -1,6 +1,7 @@
 // src/components/MatchList.tsx
 // Simple match list component for displaying matches
 
+import { useTranslation } from 'react-i18next';
 import { useMatches } from '../hooks/useMatches';
 
 interface MatchListProps {
@@ -8,31 +9,32 @@ interface MatchListProps {
 }
 
 export function MatchList({ challengeId }: MatchListProps) {
+  const { t } = useTranslation();
   const { matches, loading, error } = useMatches(challengeId);
 
   if (loading) {
-    return <div>Loading matches...</div>;
+    return <div>{t('matches.loading')}</div>;
   }
 
   if (error) {
-    return <div style={{ color: 'red' }}>Error: {error}</div>;
+    return <div style={{ color: 'red' }}>{t('matches.errorPrefix')}: {error}</div>;
   }
 
   if (matches.length === 0) {
-    return <div>No matches found for this challenge.</div>;
+    return <div>{t('matches.noMatches')}</div>;
   }
 
   return (
     <div>
-      <h2>Matches</h2>
+      <h2>{t('matches.heading')}</h2>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ borderBottom: '2px solid #ccc' }}>
-            <th style={{ textAlign: 'left', padding: '8px' }}>Teams</th>
-            <th style={{ textAlign: 'left', padding: '8px' }}>Kickoff</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>Status</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>Score</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>Locked</th>
+            <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderTeams')}</th>
+            <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderKickoff')}</th>
+            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderStatus')}</th>
+            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderScore')}</th>
+            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderLocked')}</th>
           </tr>
         </thead>
         <tbody>
@@ -55,7 +57,7 @@ export function MatchList({ challengeId }: MatchListProps) {
                     color: 'white',
                   }}
                 >
-                  {match.status}
+                  {getLocalizedStatus(match.status, t)}
                 </span>
               </td>
               <td
@@ -93,5 +95,23 @@ function getStatusColor(status: string): string {
       return '#dc3545'; // red
     default:
       return '#6c757d';
+  }
+}
+
+/**
+ * Get localized status label.
+ */
+function getLocalizedStatus(status: string, t: (key: string) => string): string {
+  switch (status) {
+    case 'scheduled':
+      return t('matches.statusScheduled');
+    case 'in_progress':
+      return t('matches.statusInProgress');
+    case 'completed':
+      return t('matches.statusCompleted');
+    case 'void':
+      return t('matches.statusVoid');
+    default:
+      return status;
   }
 }
