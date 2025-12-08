@@ -1,0 +1,111 @@
+// src/hooks/useMatches.ts
+// View-model hook for fetching and displaying matches
+
+import { useState, useEffect } from 'react';
+import { loadChallenge } from '../persistence/challenges';
+import { loadMatches } from '../persistence/matches';
+import type { Match } from '../domain/types';
+import {
+  isMatchLocked,
+  formatMatchScore,
+  formatMatchTeams,
+} from '../domain/match';
+
+/**
+ * View-model for a single match row.
+ * Contains both raw match data and computed display properties.
+ */
+export interface MatchViewModel {
+  id: string;
+  teamsDisplay: string; // "Brazil vs Morocco"
+  kickoffAt: Date | null;
+  kickoffDisplay: string; // Formatted kickoff time or "TBD"
+  status: string; // Match status
+  scoreDisplay: string; // "2-1" or "?"
+  isLocked: boolean; // Whether bets are locked
+  match: Match; // Raw match data for further use
+}
+
+/**
+ * Hook state and actions.
+ */
+interface UseMatchesResult {
+  matches: MatchViewModel[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+/**
+ * Fetch and display matches for a challenge.
+ * Computes display-ready properties using domain logic.
+ *
+ * @param challengeId - The challenge ID (or null to skip loading)
+ * @returns Matches with computed display properties
+ */
+export function useMatches(challengeId: string | null): UseMatchesResult {
+  const [matches, setMatches] = useState<MatchViewModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMatches = async () => {
+    if (!challengeId) {
+      setMatches([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Load challenge to get lock time configuration
+      const challenge = await loadChallenge(challengeId);
+      if (!challenge) {
+        throw new Error('Challenge not found');
+      }
+
+      // Load all matches for this challenge
+      const rawMatches = await loadMatches(challengeId);
+
+      // Transform to view models using domain logic
+      const now = new Date();
+      const viewModels: MatchViewModel[] = rawMatches.map((match) => ({
+        id: match.id,
+        teamsDisplay: formatMatchTeams(match),
+        kickoffAt: match.kickoffAt,
+        kickoffDisplay: match.kickoffAt
+          ? match.kickoffAt.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              timeZoneName: 'short',
+            })
+          : 'TBD',
+        status: match.status,
+        scoreDisplay: formatMatchScore(match),
+        isLocked: isMatchLocked(match, challenge.lockTimeHours, now),
+        match, // Keep raw data for further use
+      }));
+
+      setMatches(viewModels);
+    } catch (err) {
+      console.error('Error fetching matches:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load matches');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMatches();
+  }, [challengeId]);
+
+  return {
+    matches,
+    loading,
+    error,
+    refetch: fetchMatches,
+  };
+}

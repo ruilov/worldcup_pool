@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from './i18n'
 import { PayoutSandbox } from './components/PayoutSandbox'
+import { MatchList } from './components/MatchList'
+import { useDefaultChallenge } from './hooks/useDefaultChallenge'
 
 function App() {
   const { i18n } = useTranslation()
+  const { challenge, loading: challengeLoading } = useDefaultChallenge()
 
   const handleLanguageChange = (lang: string) => {
     changeLanguage(lang)
@@ -14,7 +17,7 @@ function App() {
       style={{
         padding: '2rem',
         fontFamily: 'sans-serif',
-        maxWidth: 960,
+        maxWidth: 1200,
         margin: '0 auto',
       }}
     >
@@ -23,7 +26,18 @@ function App() {
         onLanguageChange={handleLanguageChange}
       />
 
-      <PayoutSandbox />
+      {challengeLoading ? (
+        <div>Loading challenge...</div>
+      ) : challenge ? (
+        <>
+          <MatchList challengeId={challenge.id} />
+          <div style={{ marginTop: '3rem' }}>
+            <PayoutSandbox />
+          </div>
+        </>
+      ) : (
+        <div>No default challenge found. Please check your database setup.</div>
+      )}
     </div>
   )
 }
