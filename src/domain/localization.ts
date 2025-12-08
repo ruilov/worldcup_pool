@@ -14,8 +14,11 @@ import type { Match } from './types';
  */
 export function translateTeamName(teamName: string, t: TFunction): string {
   // First, try direct translation lookup
-  const directTranslation = t(`teamNames.${teamName}`, { defaultValue: null });
-  if (directTranslation) {
+  const translationKey = `teamNames.${teamName}`;
+  const directTranslation = t(translationKey);
+
+  // Check if we got a real translation (not just the key back)
+  if (directTranslation && directTranslation !== translationKey) {
     return directTranslation;
   }
 
