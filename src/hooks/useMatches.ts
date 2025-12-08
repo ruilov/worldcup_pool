@@ -2,14 +2,15 @@
 // View-model hook for fetching and displaying matches
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { loadChallenge } from '../persistence/challenges';
 import { loadMatches } from '../persistence/matches';
 import type { Match } from '../domain/types';
 import {
   isMatchLocked,
   formatMatchScore,
-  formatMatchTeams,
 } from '../domain/match';
+import { formatMatchTeamsLocalized } from '../domain/localization';
 
 /**
  * View-model for a single match row.
@@ -46,6 +47,7 @@ interface UseMatchesResult {
  * @returns Matches with computed display properties
  */
 export function useMatches(challengeId: string | null): UseMatchesResult {
+  const { t, i18n } = useTranslation();
   const [matches, setMatches] = useState<MatchViewModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,17 +78,17 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
         id: match.id,
         matchNumber: match.matchNumber,
         matchNumberDisplay: `#${match.matchNumber}`,
-        teamsDisplay: formatMatchTeams(match),
+        teamsDisplay: formatMatchTeamsLocalized(match, t),
         kickoffAt: match.kickoffAt,
         kickoffDisplay: match.kickoffAt
-          ? match.kickoffAt.toLocaleString('en-US', {
+          ? match.kickoffAt.toLocaleString(i18n.language, {
               month: 'short',
               day: 'numeric',
               hour: 'numeric',
               minute: '2-digit',
               timeZoneName: 'short',
             })
-          : 'TBD',
+          : t('matches.kickoffTBD'),
         status: match.status,
         scoreDisplay: formatMatchScore(match),
         isLocked: isMatchLocked(match, challenge.lockTimeHours, now),
@@ -104,7 +106,8 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
 
   useEffect(() => {
     fetchMatches();
-  }, [challengeId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challengeId, i18n.language]);
 
   return {
     matches,
