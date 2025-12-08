@@ -11,9 +11,12 @@ import {
   isMatchFinal,
   canSettleMatch,
   formatMatchTeams,
-  LOCK_TIME_BEFORE_KICKOFF_MS,
 } from './match';
 import type { Match } from './types';
+
+// Test lock time: 2 hours
+const TEST_LOCK_TIME_HOURS = 2.0;
+const TEST_LOCK_TIME_MS = TEST_LOCK_TIME_HOURS * 60 * 60 * 1000;
 
 // Helper to create a test match
 function createTestMatch(overrides: Partial<Match> = {}): Match {
@@ -37,17 +40,26 @@ describe('match domain logic', () => {
     it('should return lock time 2 hours before kickoff', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff });
-      const lockTime = getMatchLockTime(match);
+      const lockTime = getMatchLockTime(match, TEST_LOCK_TIME_HOURS);
 
       expect(lockTime).not.toBeNull();
-      expect(lockTime!.getTime()).toBe(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS);
+      expect(lockTime!.getTime()).toBe(kickoff.getTime() - TEST_LOCK_TIME_MS);
     });
 
     it('should return null if match has no kickoff time', () => {
       const match = createTestMatch({ kickoffAt: null });
-      const lockTime = getMatchLockTime(match);
+      const lockTime = getMatchLockTime(match, TEST_LOCK_TIME_HOURS);
 
       expect(lockTime).toBeNull();
+    });
+
+    it('should support custom lock times', () => {
+      const kickoff = new Date('2026-06-13T18:00:00-04:00');
+      const match = createTestMatch({ kickoffAt: kickoff });
+      const lockTime = getMatchLockTime(match, 1.5); // 90 minutes
+
+      expect(lockTime).not.toBeNull();
+      expect(lockTime!.getTime()).toBe(kickoff.getTime() - 1.5 * 60 * 60 * 1000);
     });
   });
 
@@ -55,31 +67,31 @@ describe('match domain logic', () => {
     it('should return false before lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff });
-      const now = new Date(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS - 1000); // 1 second before lock
+      const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS - 1000); // 1 second before lock
 
-      expect(isMatchLocked(match, now)).toBe(false);
+      expect(isMatchLocked(match, TEST_LOCK_TIME_HOURS, now)).toBe(false);
     });
 
     it('should return true at exactly lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff });
-      const now = new Date(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS);
+      const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS);
 
-      expect(isMatchLocked(match, now)).toBe(true);
+      expect(isMatchLocked(match, TEST_LOCK_TIME_HOURS, now)).toBe(true);
     });
 
     it('should return true after lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff });
-      const now = new Date(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS + 1000); // 1 second after lock
+      const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS + 1000); // 1 second after lock
 
-      expect(isMatchLocked(match, now)).toBe(true);
+      expect(isMatchLocked(match, TEST_LOCK_TIME_HOURS, now)).toBe(true);
     });
 
     it('should return false if match has no kickoff time', () => {
       const match = createTestMatch({ kickoffAt: null });
 
-      expect(isMatchLocked(match)).toBe(false);
+      expect(isMatchLocked(match, TEST_LOCK_TIME_HOURS)).toBe(false);
     });
   });
 
@@ -87,35 +99,35 @@ describe('match domain logic', () => {
     it('should return true for scheduled match before lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff, status: 'scheduled' });
-      const now = new Date(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS - 1000);
+      const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS - 1000);
 
-      expect(canPlaceBetsOnMatch(match, now)).toBe(true);
+      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS, now)).toBe(true);
     });
 
     it('should return false for scheduled match after lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
       const match = createTestMatch({ kickoffAt: kickoff, status: 'scheduled' });
-      const now = new Date(kickoff.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS + 1000);
+      const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS + 1000);
 
-      expect(canPlaceBetsOnMatch(match, now)).toBe(false);
+      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS, now)).toBe(false);
     });
 
     it('should return false for in_progress match', () => {
       const match = createTestMatch({ status: 'in_progress' });
 
-      expect(canPlaceBetsOnMatch(match)).toBe(false);
+      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
     });
 
     it('should return false for completed match', () => {
       const match = createTestMatch({ status: 'completed' });
 
-      expect(canPlaceBetsOnMatch(match)).toBe(false);
+      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
     });
 
     it('should return false for void match', () => {
       const match = createTestMatch({ status: 'void' });
 
-      expect(canPlaceBetsOnMatch(match)).toBe(false);
+      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
     });
   });
 

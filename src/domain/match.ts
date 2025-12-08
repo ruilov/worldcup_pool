@@ -4,16 +4,6 @@
 import type { Match, MatchStatus } from './types';
 
 // ============================================================
-// Constants
-// ============================================================
-
-/**
- * Number of milliseconds before kickoff when bets lock.
- * Default: 2 hours = 7,200,000 milliseconds
- */
-export const LOCK_TIME_BEFORE_KICKOFF_MS = 2 * 60 * 60 * 1000;
-
-// ============================================================
 // Time and Locking Logic
 // ============================================================
 
@@ -22,13 +12,15 @@ export const LOCK_TIME_BEFORE_KICKOFF_MS = 2 * 60 * 60 * 1000;
  * Returns null if the match has no kickoff time.
  *
  * @param match - The match to calculate lock time for
- * @returns Lock time (2 hours before kickoff) or null
+ * @param lockTimeHours - Hours before kickoff when bets lock (from challenge config)
+ * @returns Lock time or null
  */
-export function getMatchLockTime(match: Match): Date | null {
+export function getMatchLockTime(match: Match, lockTimeHours: number): Date | null {
   if (!match.kickoffAt) {
     return null;
   }
-  return new Date(match.kickoffAt.getTime() - LOCK_TIME_BEFORE_KICKOFF_MS);
+  const lockTimeMs = lockTimeHours * 60 * 60 * 1000;
+  return new Date(match.kickoffAt.getTime() - lockTimeMs);
 }
 
 /**
@@ -36,11 +28,12 @@ export function getMatchLockTime(match: Match): Date | null {
  * A match is locked if current time >= lock time.
  *
  * @param match - The match to check
+ * @param lockTimeHours - Hours before kickoff when bets lock (from challenge config)
  * @param now - Current time (defaults to Date.now())
  * @returns true if the match is locked, false otherwise
  */
-export function isMatchLocked(match: Match, now: Date = new Date()): boolean {
-  const lockTime = getMatchLockTime(match);
+export function isMatchLocked(match: Match, lockTimeHours: number, now: Date = new Date()): boolean {
+  const lockTime = getMatchLockTime(match, lockTimeHours);
   if (!lockTime) {
     // No kickoff time means we can't determine lock status; treat as not locked
     return false;
@@ -53,11 +46,12 @@ export function isMatchLocked(match: Match, now: Date = new Date()): boolean {
  * Bets can be placed if the match is not locked and status is 'scheduled'.
  *
  * @param match - The match to check
+ * @param lockTimeHours - Hours before kickoff when bets lock (from challenge config)
  * @param now - Current time (defaults to Date.now())
  * @returns true if bets can be placed, false otherwise
  */
-export function canPlaceBetsOnMatch(match: Match, now: Date = new Date()): boolean {
-  return match.status === 'scheduled' && !isMatchLocked(match, now);
+export function canPlaceBetsOnMatch(match: Match, lockTimeHours: number, now: Date = new Date()): boolean {
+  return match.status === 'scheduled' && !isMatchLocked(match, lockTimeHours, now);
 }
 
 // ============================================================

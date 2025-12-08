@@ -18,6 +18,19 @@ export type BetStatus = 'open' | 'locked' | 'settled' | 'cancelled';
 // ============================================================
 
 /**
+ * A self-contained game instance that an organizer creates.
+ * Encapsulates configuration like language, lock time, and other rules.
+ */
+export interface Challenge {
+  id: string;
+  code: string;
+  name: string;
+  defaultLanguage: string;
+  lockTimeHours: number; // Hours before kickoff when bets lock (e.g., 2.0)
+  createdAt: Date;
+}
+
+/**
  * A World Cup match within a challenge.
  * Represents the real-world game with teams, scheduling, and final scores.
  */

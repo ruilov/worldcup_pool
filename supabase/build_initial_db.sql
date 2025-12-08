@@ -77,6 +77,7 @@ create table if not exists public.challenges (
   code             text not null unique,               -- short identifier, e.g. "default"
   name             text not null,                      -- display name
   default_language text not null default 'en',         -- e.g. 'en', 'pt', 'es'
+  lock_time_hours  numeric(4,2) not null default 2.0,  -- hours before kickoff when bets lock
   created_at       timestamptz not null default now()
 );
 
