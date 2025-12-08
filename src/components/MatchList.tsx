@@ -1,8 +1,9 @@
 // src/components/MatchList.tsx
-// Simple match list component for displaying matches
+// Match list component with sports-stats terminal design
 
 import { useTranslation } from 'react-i18next';
 import { useMatches } from '../hooks/useMatches';
+import styles from './MatchList.module.css';
 
 interface MatchListProps {
   challengeId: string;
@@ -13,97 +14,133 @@ export function MatchList({ challengeId }: MatchListProps) {
   const { matches, loading, error } = useMatches(challengeId);
 
   if (loading) {
-    return <div>{t('matches.loading')}</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>{t('matches.loading')}</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div style={{ color: 'red' }}>{t('matches.errorPrefix')}: {error}</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.error}>
+          {t('matches.errorPrefix')}: {error}
+        </div>
+      </div>
+    );
   }
 
   if (matches.length === 0) {
-    return <div>{t('matches.noMatches')}</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.empty}>{t('matches.noMatches')}</div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2>{t('matches.heading')}</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #ccc' }}>
-            <th style={{ textAlign: 'center', padding: '8px', width: '60px' }}>{t('matches.tableHeaderMatch')}</th>
-            <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderTeams')}</th>
-            <th style={{ textAlign: 'left', padding: '8px' }}>{t('matches.tableHeaderKickoff')}</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderStatus')}</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderScore')}</th>
-            <th style={{ textAlign: 'center', padding: '8px' }}>{t('matches.tableHeaderLocked')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {matches.map((match) => (
-            <tr
-              key={match.id}
-              style={{ borderBottom: '1px solid #eee' }}
-            >
-              <td style={{ textAlign: 'center', padding: '8px', color: '#666', fontSize: '0.9em' }}>
-                {match.matchNumberDisplay}
-              </td>
-              <td style={{ padding: '8px' }}>{match.teamsDisplay}</td>
-              <td style={{ padding: '8px', fontSize: '0.9em' }}>
-                {match.kickoffDisplay}
-              </td>
-              <td style={{ textAlign: 'center', padding: '8px' }}>
-                <span
-                  style={{
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.85em',
-                    backgroundColor: getStatusColor(match.status),
-                    color: 'white',
-                  }}
-                >
-                  {getLocalizedStatus(match.status, t)}
-                </span>
-              </td>
-              <td
-                style={{
-                  textAlign: 'center',
-                  padding: '8px',
-                  fontWeight: 'bold',
-                }}
-              >
-                {match.scoreDisplay}
-              </td>
-              <td style={{ textAlign: 'center', padding: '8px' }}>
-                {match.isLocked ? '🔒' : '🔓'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>{t('matches.heading')}</h2>
+      </div>
+
+      <div className={styles.grid}>
+        {/* Grid header */}
+        <div className={styles.gridHeader}>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderMatch')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderTeams')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderKickoff')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderStatus')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderScore')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderLocked')}</div>
+        </div>
+
+        {/* Match rows */}
+        {matches.map((match) => (
+          <div key={match.id} className={styles.matchRow}>
+            <div className={`${styles.cell} ${styles.cellMatch}`}>
+              {match.matchNumberDisplay}
+            </div>
+            <div className={`${styles.cell} ${styles.cellTeams}`}>
+              {match.teamsDisplay}
+            </div>
+            <div className={`${styles.cell} ${styles.cellKickoff}`}>
+              {match.kickoffDisplay}
+            </div>
+            <div className={`${styles.cell} ${styles.cellStatus}`}>
+              <StatusBadge status={match.status} t={t} />
+            </div>
+            <div className={`${styles.cell} ${styles.cellScore}`}>
+              <ScoreDisplay score={match.scoreDisplay} />
+            </div>
+            <div className={`${styles.cell} ${styles.cellLocked}`}>
+              <LockIcon isLocked={match.isLocked} />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 /**
- * Get a background color for a match status.
+ * Status badge component
  */
-function getStatusColor(status: string): string {
+function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
+  const statusClass = getStatusClassName(status);
+  const label = getLocalizedStatus(status, t);
+
+  return <span className={`${styles.statusBadge} ${statusClass}`}>{label}</span>;
+}
+
+/**
+ * Score display component
+ */
+function ScoreDisplay({ score }: { score: string }) {
+  const isPlaceholder = score === '?' || score === '-';
+
+  return (
+    <span className={isPlaceholder ? styles.scorePlaceholder : styles.score}>
+      {score}
+    </span>
+  );
+}
+
+/**
+ * Lock icon component
+ */
+function LockIcon({ isLocked }: { isLocked: boolean }) {
+  return (
+    <span
+      className={`${styles.lockIcon} ${isLocked ? styles.locked : styles.unlocked}`}
+      title={isLocked ? 'Locked' : 'Unlocked'}
+    >
+      {isLocked ? '🔒' : '🔓'}
+    </span>
+  );
+}
+
+/**
+ * Get CSS class name for status badge
+ */
+function getStatusClassName(status: string): string {
   switch (status) {
     case 'scheduled':
-      return '#6c757d'; // gray
+      return styles.scheduled;
     case 'in_progress':
-      return '#28a745'; // green
+      return styles.inProgress;
     case 'completed':
-      return '#007bff'; // blue
+      return styles.completed;
     case 'void':
-      return '#dc3545'; // red
+      return styles.void;
     default:
-      return '#6c757d';
+      return '';
   }
 }
 
 /**
- * Get localized status label.
+ * Get localized status label
  */
 function getLocalizedStatus(status: string, t: (key: string) => string): string {
   switch (status) {
