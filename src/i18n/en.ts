@@ -15,6 +15,28 @@ const en = {
     loadError: 'Failed to load value from database.',
     invalidNumber: 'Please enter a valid number.',
   },
+  sandbox: {
+    heading: 'Payout sandbox',
+    description:
+      'Try different blinds, bets, and outcomes to see how the pot and payouts are calculated.',
+    blindLabel: 'Blind (T$)',
+    winningOutcomeLabel: 'Winning outcome',
+    parametersSectionTitle: 'Parameters',
+    betsSectionTitle: 'Bets',
+    playerIdLabel: 'Player',
+    outcomeLabel: 'Outcome',
+    stakeLabel: 'Stake (T$)',
+    payoutLabel: 'Payout (T$)',
+    addBet: 'Add bet',
+    removeBet: 'Remove',
+    calculateButton: 'Calculate payouts',
+    resultsSectionTitle: 'Results',
+    totalWageredLabel: 'Total wagered',
+    totalPotLabel: 'Total pot',
+    removedFromGameLabel: 'Removed from game',
+    payoutsSectionTitle: 'Payouts',
+    noResults: 'No results yet. Enter data and calculate.',
+  },
 }
 
 export default en
