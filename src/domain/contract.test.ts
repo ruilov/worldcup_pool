@@ -19,6 +19,7 @@ function createTestMatch(overrides: Partial<Match> = {}): Match {
   return {
     id: 'match-1',
     challengeId: 'challenge-1',
+    matchNumber: 1,
     team1Name: 'Brazil',
     team2Name: 'Morocco',
     kickoffAt: new Date('2026-06-13T18:00:00-04:00'),

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from './i18n'
-import { PayoutSandbox } from './components/PayoutSandbox'
 import { MatchList } from './components/MatchList'
 import { useDefaultChallenge } from './hooks/useDefaultChallenge'
 
@@ -29,12 +28,7 @@ function App() {
       {challengeLoading ? (
         <div>{t('matches.loadingChallenge')}</div>
       ) : challenge ? (
-        <>
-          <MatchList challengeId={challenge.id} />
-          <div style={{ marginTop: '3rem' }}>
-            <PayoutSandbox />
-          </div>
-        </>
+        <MatchList challengeId={challenge.id} />
       ) : (
         <div>{t('matches.noChallengeFound')}</div>
       )}
