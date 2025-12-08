@@ -17,8 +17,24 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--border-medium);
+  padding: var(--space-lg);
+  background: var(--gradient-dark);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-cyber);
+  opacity: 0.6;
 }
 
 .logo {
@@ -29,23 +45,28 @@
 
 .logoIcon {
   font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
 }
 
 .logoText {
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--text-primary);
+  background: var(--gradient-cyber);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.02em;
   margin: 0;
 }
 
 .logoSubtext {
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--accent-cyan);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
   margin-left: var(--space-sm);
+  opacity: 0.8;
 }
 
 /* Language selector */
@@ -64,7 +85,7 @@
 }
 
 .languageSelect {
-  background-color: var(--bg-tertiary);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-medium);
   color: var(--text-primary);
   padding: var(--space-sm) var(--space-md);
@@ -72,18 +93,21 @@
   font-size: var(--text-sm);
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   outline: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .languageSelect:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-strong);
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-tertiary) 100%);
+  border-color: var(--accent-cyan-dim);
+  box-shadow: var(--shadow-md), 0 0 12px rgba(6, 182, 212, 0.15);
+  transform: translateY(-1px);
 }
 
 .languageSelect:focus {
   border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--accent-glow-strong), var(--shadow-cyan);
 }
 
 .languageSelect option {
