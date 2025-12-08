@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from './supabaseClient'
+import { changeLanguage } from './i18n'
 
 function App() {
+  const { t, i18n } = useTranslation()
   const [value, setValue] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -23,7 +26,7 @@ function App() {
 
       if (error) {
         console.error(error)
-        setError('Failed to load value from database.')
+        setError(t('settings.loadError'))
       } else if (data) {
         setValue(String(data.value))
       }
@@ -32,6 +35,8 @@ function App() {
     }
 
     void load()
+    // t is stable enough here for this usage, but to be safe we don't add it as a dep
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSave = async () => {
@@ -41,7 +46,7 @@ function App() {
 
     const numericValue = Number(value)
     if (Number.isNaN(numericValue)) {
-      setError('Please enter a valid number.')
+      setError(t('settings.invalidNumber'))
       setSaving(false)
       return
     }
@@ -53,36 +58,56 @@ function App() {
 
     if (error) {
       console.error(error)
-      setError('Failed to save value.')
+      setError(t('settings.saveError'))
     } else {
-      setSuccess('Saved!')
+      setSuccess(t('settings.saved'))
     }
 
     setSaving(false)
   }
 
+  const handleLanguageChange = (lang: string) => {
+    changeLanguage(lang)
+  }
+
   if (loading) {
     return (
       <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-        <h1>World Cup Pool (Prototype)</h1>
-        <p>Loading current value…</p>
+        <Header
+          currentLang={i18n.language}
+          onLanguageChange={handleLanguageChange}
+        />
+        <p>{t('common.loading')}</p>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: 480 }}>
-      <h1>World Cup Pool (Prototype)</h1>
-      <p>
-        This is a simple test: a single number stored in Supabase. Anyone can read and update it
-        (no authentication yet).
-      </p>
+    <div
+      style={{
+        padding: '2rem',
+        fontFamily: 'sans-serif',
+        maxWidth: 480,
+        margin: '0 auto',
+      }}
+    >
+      <Header
+        currentLang={i18n.language}
+        onLanguageChange={handleLanguageChange}
+      />
 
-      <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-        Value in database:
+      <h1>{t('settings.heading')}</h1>
+      <p>{t('settings.description')}</p>
+
+      <label
+        style={{ display: 'block', marginBottom: '0.5rem' }}
+        htmlFor="db-value"
+      >
+        {t('settings.valueLabel')}
       </label>
 
       <input
+        id="db-value"
         type="number"
         value={value}
         onChange={e => setValue(e.target.value)}
@@ -94,7 +119,7 @@ function App() {
         disabled={saving}
         style={{ padding: '0.5rem 1rem' }}
       >
-        {saving ? 'Saving…' : 'Save'}
+        {saving ? t('common.loading') : t('common.save')}
       </button>
 
       {error && (
@@ -109,6 +134,41 @@ function App() {
         </p>
       )}
     </div>
+  )
+}
+
+type HeaderProps = {
+  currentLang: string
+  onLanguageChange: (lang: string) => void
+}
+
+function Header({ currentLang, onLanguageChange }: HeaderProps) {
+  const { t } = useTranslation()
+
+  return (
+    <header
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '1.5rem',
+      }}
+    >
+      <span style={{ fontWeight: 600 }}>{t('common.appName')}</span>
+
+      <label
+        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+      >
+        <span>{t('common.language')}:</span>
+        <select
+          value={currentLang}
+          onChange={e => onLanguageChange(e.target.value)}
+        >
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+        </select>
+      </label>
+    </header>
   )
 }
 
