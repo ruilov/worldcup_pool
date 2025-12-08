@@ -1,0 +1,100 @@
+======= Instructions for Players =========
+
+World Cup Fantasy Challenge 2026
+
+Let’s see who finishes the tournament with the biggest stack of Tackles.
+
+1. Bankroll & Objective
+Each player starts with T$1,000 (“Tackles”).
+All bets and payouts use whole Tackles (integers only, no decimals).
+You can’t borrow or go negative.
+At the end of the World Cup, the player with the most Tackles wins; ties share the same final rank.
+
+2. Contracts, Pots, and Blinds
+Per match, there are three separate contracts, each with its own bets, blind, and payouts:
+
+1. Winner – predict which team wins or a draw.
+2. Goal Difference – predict the goal margin: (first-listed team) − (second-listed team).
+3. Score – predict the exact final score (e.g., 2–1).
+
+Blinds
+Every contract has a blind: free Tackles added to that contract’s pot.
+Blinds are lowest for Winner, highest for Score, and grow later in the tournament.
+Contract pot = sum of all bets on that contract + that contract’s blind
+If no one bets on a contract at all, its blind and pot simply disappear (no one gets them).
+
+3. How the Odds and Payouts Work
+Example for Brazil vs Morocco, Winner contract:
+Alice bets T$10 on Brazil, Bob T$20, Charlie T$15 = T$45 on Brazil.
+Eve bets T$15 on Morocco.
+Total wagers: T$60.
+Blind for this contract: T$30.
+Total pot: T$60 + T$30 = T$90.
+
+If Brazil wins
+Brazil backers share the pot in proportion to their bets:
+Alice: 10/45 × 90 = T$20
+Bob: 20/45 × 90 = T$40
+Charlie: 15/45 × 90 = T$30
+With T$45 bet on Brazil and a T$90 pot, Brazil’s effective odds were 2 : 1, driven entirely by players’ bets.
+
+If Morocco wins
+Only bettors on Morocco share the pot:
+Eve is the only one on Morocco, so she gets T$90.
+
+If it’s a draw
+No one bet on a draw, so no one is paid and the entire pot disappears.
+
+General rule for all contracts
+Only bettors who chose the correct outcome share that contract’s pot.
+If no one picked the correct outcome, the entire pot (including blind) disappears.
+Any leftover Tackles from rounding (see FAQ) are also removed from the game.
+
+4. Match Rules (Group vs Knockout)
+For Goal Difference and Score, the final result includes extra-time goals (but not penalty shootout goals).
+
+For Winner:
+Group stage: Winner/Draw is decided by the result after 90 minutes (plus stoppage).
+Knockout stage:
+If the match is decided in regular time or extra time, the team that advances is the Winner.
+If the match goes to penalties, the Winner contract settles as a draw.
+
+If a match is postponed or abandoned and not completed, all bets on that match’s contracts are void and refunded, and their blinds disappear.
+
+5. Placing Bets
+You can bet on any future match as long as its kickoff is more than 2 hours away.
+Bets lock in and become final at T−2 hours for that match; until then you can place, change, or cancel bets.
+
+For each contract and match:
+You may bet on more than one outcome per contract (e.g., both Brazil and Draw in the Winner contract).
+If your bets that lock at the same time would exceed your available Tackles, those bets are automatically reduced proportionally so that, together, they use exactly all of your remaining Tackles (but never push you below zero).
+No trading, gifting, or loaning Tackles between players
+
+6. Information and Visibility
+Until 2 hours before kickoff, all individual bets are secret.
+At T−2 hours, for that match, all players’ bet sizes on each outcome are revealed.
+Results and payouts are applied after the match and each contract is final.
+
+7. FAQ
+
+Minimum bet?
+T$1 per outcome; all bets must be whole Tackles.
+
+How does rounding work?
+Payouts are calculated exactly, then rounded down to the nearest whole T$ for each player.
+Any leftover Tackles from rounding are removed from the game.
+
+What if players tie at the end?
+Players with the same final Tackles share the same rank; how you handle any real-world prizes is up to the organizer.
+
+
+======= Instructions for Organizers =========
+
+You can create your own Challenge and invite family and friends to join. As an organizer, you choose:
+
+Language. Available: English, Spanish, Portuguese (others on request).
+Contract types. Any combination of Winner, Goal Difference, and Score contracts.
+Blind settings. Relative size of blinds for each contract type, and how quickly blinds grow as the tournament progresses.
+
+After you create a Challenge, you can invite players by generating a unique invite link for each player.
+
