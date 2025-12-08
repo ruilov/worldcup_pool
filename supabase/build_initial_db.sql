@@ -1,8 +1,24 @@
--- supabase/schema_v1.sql
--- Initial schema for World Cup pool MVP (single or multiple challenges).
--- This script is meant to be re-runnable on an empty database or a fresh project.
+-- supabase/build_initial_db.sql
+-- Rebuilds the database schema from scratch (drops tables/types, recreates, seeds default challenge).
 -- Run with:
---   supabase db execute --file supabase/schema_v1.sql
+--   supabase db execute --file supabase/build_initial_db.sql
+
+------------------------------------------------------------
+-- Drop existing tables (child -> parent) and types
+------------------------------------------------------------
+
+drop table if exists public.contract_payouts cascade;
+drop table if exists public.bets cascade;
+drop table if exists public.contracts cascade;
+drop table if exists public.matches cascade;
+drop table if exists public.challenge_entries cascade;
+drop table if exists public.users cascade;
+drop table if exists public.challenges cascade;
+
+drop type if exists bet_status cascade;
+drop type if exists contract_status cascade;
+drop type if exists match_status cascade;
+drop type if exists contract_type cascade;
 
 ------------------------------------------------------------
 -- Extensions
@@ -64,26 +80,28 @@ create table if not exists public.challenges (
   created_at       timestamptz not null default now()
 );
 
--- Players: logical player identity within a challenge
-create table if not exists public.players (
+-- Users: global identity across challenges
+create table if not exists public.users (
   id           uuid primary key default gen_random_uuid(),
-  challenge_id uuid not null references public.challenges (id) on delete cascade,
-  name         text not null,                    -- display name chosen by the user
+  display_name text not null,
   created_at   timestamptz not null default now(),
-  -- prevent exact name duplicates within the same challenge (soft uniqueness)
-  unique (challenge_id, name)
+  unique (display_name)
 );
 
--- Player balances: Tackles per player per challenge
--- For now we store current balance directly; history will be in bets & settlements.
-create table if not exists public.player_balances (
-  player_id        uuid primary key references public.players (id) on delete cascade,
+-- Challenge entries: user participation + balance per challenge
+create table if not exists public.challenge_entries (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references public.users (id) on delete cascade,
   challenge_id     uuid not null references public.challenges (id) on delete cascade,
+  display_name     text not null,             -- name for this challenge (can differ per challenge)
   starting_balance integer not null default 1000,  -- starting Tackles
   current_balance  integer not null default 1000,  -- current Tackles
+  created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
   check (starting_balance >= 0),
-  check (current_balance >= 0)
+  check (current_balance >= 0),
+  unique (challenge_id, user_id),
+  unique (challenge_id, display_name)
 );
 
 -- Matches: real-world games within a challenge
@@ -126,28 +144,28 @@ create index if not exists idx_contracts_match
 create index if not exists idx_contracts_type
   on public.contracts (type);
 
--- Bets: player stakes on a contract outcome
+-- Bets: stakes on a contract outcome
 create table if not exists public.bets (
-  id          uuid primary key default gen_random_uuid(),
-  contract_id uuid not null references public.contracts (id) on delete cascade,
-  player_id   uuid not null references public.players (id) on delete cascade,
-  outcome     text not null,              -- e.g., "Brazil", "Draw", "1", "2-1"
-  stake       integer not null,          -- integer T$ (Tackles)
-  status      bet_status not null default 'open',
-  created_at  timestamptz not null default now(),
-  locked_at   timestamptz,
-  settled_at  timestamptz,
+  id                  uuid primary key default gen_random_uuid(),
+  contract_id         uuid not null references public.contracts (id) on delete cascade,
+  challenge_entry_id  uuid not null references public.challenge_entries (id) on delete cascade,
+  outcome             text not null,              -- e.g., "Brazil", "Draw", "1", "2-1"
+  stake               integer not null,           -- integer T$ (Tackles)
+  status              bet_status not null default 'open',
+  created_at          timestamptz not null default now(),
+  locked_at           timestamptz,
+  settled_at          timestamptz,
   check (stake >= 1)
 );
 
 create index if not exists idx_bets_contract
   on public.bets (contract_id);
 
-create index if not exists idx_bets_player
-  on public.bets (player_id);
+create index if not exists idx_bets_entry
+  on public.bets (challenge_entry_id);
 
-create index if not exists idx_bets_contract_player
-  on public.bets (contract_id, player_id);
+create index if not exists idx_bets_contract_entry
+  on public.bets (contract_id, challenge_entry_id);
 
 ------------------------------------------------------------
 -- Optional: settlement details per contract (audit trail)
@@ -155,22 +173,22 @@ create index if not exists idx_bets_contract_player
 
 -- Per-player payouts for a settled contract (optional but useful for debugging)
 create table if not exists public.contract_payouts (
-  id          bigserial primary key,
-  contract_id uuid not null references public.contracts (id) on delete cascade,
-  player_id   uuid not null references public.players (id) on delete cascade,
-  payout      integer not null,     -- integer T$ paid to this player for this contract
-  created_at  timestamptz not null default now(),
+  id                  bigserial primary key,
+  contract_id         uuid not null references public.contracts (id) on delete cascade,
+  challenge_entry_id  uuid not null references public.challenge_entries (id) on delete cascade,
+  payout              integer not null,     -- integer T$ paid to this entry for this contract
+  created_at          timestamptz not null default now(),
   check (payout >= 0)
 );
 
 create index if not exists idx_contract_payouts_contract
   on public.contract_payouts (contract_id);
 
-create index if not exists idx_contract_payouts_player
-  on public.contract_payouts (player_id);
+create index if not exists idx_contract_payouts_entry
+  on public.contract_payouts (challenge_entry_id);
 
 ------------------------------------------------------------
--- Seed data (optional but convenient for development)
+-- Seed data
 ------------------------------------------------------------
 
 -- Create a default challenge if it does not already exist.
@@ -178,6 +196,6 @@ insert into public.challenges (code, name, default_language)
 values ('default', 'World Cup 2026 Default Challenge', 'en')
 on conflict (code) do nothing;
 
--- Note: you can create matches, contracts, players, and initial balances
+-- Note: you can create matches, contracts, users, and challenge entries
 -- either via the Supabase UI, additional SQL seed scripts, or from the app.
 -- This file focuses on schema and a single default challenge.
