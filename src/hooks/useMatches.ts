@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { loadChallenge } from '../persistence/challenges';
 import { loadMatches } from '../persistence/matches';
 import type { Match } from '../domain/types';
 import { formatMatchScore } from '../domain/match';
@@ -57,12 +56,6 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
     try {
       setLoading(true);
       setError(null);
-
-      // Load challenge to get lock time configuration
-      const challenge = await loadChallenge(challengeId);
-      if (!challenge) {
-        throw new Error('Challenge not found');
-      }
 
       // Load all matches for this challenge
       const rawMatches = await loadMatches(challengeId);
