@@ -6,10 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { loadChallenge } from '../persistence/challenges';
 import { loadMatches } from '../persistence/matches';
 import type { Match } from '../domain/types';
-import {
-  isMatchLocked,
-  formatMatchScore,
-} from '../domain/match';
+import { formatMatchScore } from '../domain/match';
 import { formatMatchTeamsLocalized } from '../domain/localization';
 
 /**
@@ -25,7 +22,6 @@ export interface MatchViewModel {
   kickoffDisplay: string; // Formatted kickoff time or "TBD"
   status: string; // Match status
   scoreDisplay: string; // "2-1" or "?"
-  isLocked: boolean; // Whether bets are locked
   match: Match; // Raw match data for further use
 }
 
@@ -91,7 +87,6 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
           : t('matches.kickoffTBD'),
         status: match.status,
         scoreDisplay: formatMatchScore(match),
-        isLocked: isMatchLocked(match, challenge.lockTimeHours, now),
         match, // Keep raw data for further use
       }));
 

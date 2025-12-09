@@ -68,7 +68,7 @@
 /* Grid header */
 .gridHeader {
   display: grid;
-  grid-template-columns: 60px 1fr 180px 100px 100px 80px;
+  grid-template-columns: 60px 1fr 180px 100px 100px;
   gap: 1px;
   background-color: var(--border-subtle);
   font-size: var(--text-xs);
@@ -104,7 +104,7 @@
 /* Match row */
 .matchRow {
   display: grid;
-  grid-template-columns: 60px 1fr 180px 100px 100px 80px;
+  grid-template-columns: 60px 1fr 180px 100px 100px;
   gap: 1px;
   background-color: var(--border-subtle);
   transition: all var(--transition-base);
@@ -247,34 +247,6 @@
   color: var(--text-muted);
   font-weight: 400;
   opacity: 0.5;
-}
-
-/* Lock indicator */
-.lockIcon {
-  font-size: var(--text-lg);
-  opacity: 0.6;
-  transition: all var(--transition-base);
-  filter: grayscale(0.3);
-}
-
-.lockIcon.locked {
-  color: var(--lock-locked);
-  opacity: 1;
-  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5)) grayscale(0);
-  animation: lockGlow 3s ease-in-out infinite;
-}
-
-.lockIcon.unlocked {
-  color: var(--lock-unlocked);
-}
-
-@keyframes lockGlow {
-  0%, 100% {
-    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.4)) grayscale(0);
-  }
-  50% {
-    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6)) grayscale(0);
-  }
 }
 
 /* Loading and error states */

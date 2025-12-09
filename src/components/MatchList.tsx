@@ -53,7 +53,6 @@ export function MatchList({ challengeId }: MatchListProps) {
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderKickoff')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderStatus')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderScore')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderLocked')}</div>
         </div>
 
         {/* Match rows */}
@@ -73,9 +72,6 @@ export function MatchList({ challengeId }: MatchListProps) {
             </div>
             <div className={`${styles.cell} ${styles.cellScore}`}>
               <ScoreDisplay score={match.scoreDisplay} />
-            </div>
-            <div className={`${styles.cell} ${styles.cellLocked}`}>
-              <LockIcon isLocked={match.isLocked} />
             </div>
           </div>
         ))}
@@ -103,20 +99,6 @@ function ScoreDisplay({ score }: { score: string }) {
   return (
     <span className={isPlaceholder ? styles.scorePlaceholder : styles.score}>
       {score}
-    </span>
-  );
-}
-
-/**
- * Lock icon component
- */
-function LockIcon({ isLocked }: { isLocked: boolean }) {
-  return (
-    <span
-      className={`${styles.lockIcon} ${isLocked ? styles.locked : styles.unlocked}`}
-      title={isLocked ? 'Locked' : 'Unlocked'}
-    >
-      {isLocked ? '🔒' : '🔓'}
     </span>
   );
 }
