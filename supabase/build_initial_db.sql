@@ -174,7 +174,6 @@ create table if not exists public.contract_payouts (
   created_at          timestamptz not null default now(),
   check (payout >= 0)
 );
-
 create index if not exists idx_contract_payouts_contract
   on public.contract_payouts (contract_id);
 
