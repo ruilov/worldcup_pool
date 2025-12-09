@@ -117,37 +117,25 @@ function buildMatchesSql(rows) {
   const lines = []
   lines.push('do $$')
   lines.push('declare')
-  lines.push('  v_challenge_id uuid;')
   lines.push('begin')
-  lines.push("  select id into v_challenge_id from public.challenges where code = 'default';")
-  lines.push('  if v_challenge_id is null then')
-  lines.push("    raise exception 'No challenge with code=default found';")
-  lines.push('  end if;')
-  lines.push('')
-  lines.push('  -- Clear existing matches for this challenge')
-  lines.push('  delete from public.matches where challenge_id = v_challenge_id;')
+  lines.push('  -- Clear existing matches')
+  lines.push('  delete from public.matches;')
   lines.push('')
   lines.push('  -- Insert matches from CSV')
   lines.push('  insert into public.matches (')
-  lines.push('    challenge_id,')
   lines.push('    match_number,')
   lines.push('    team1_name,')
   lines.push('    team2_name,')
-  lines.push('    kickoff_at,')
-  lines.push('    status')
+  lines.push('    kickoff_at')
   lines.push('  ) values')
 
   rows.forEach((row, idx) => {
     const isLast = idx === rows.length - 1
     const valuesSql = [
-      'v_challenge_id',
       row.matchNumber,
       sqlString(row.team1Name),
       sqlString(row.team2Name),
-      row.kickoffTs
-        ? sqlString(row.kickoffTs) + '::timestamptz'
-        : 'null::timestamptz',
-      "'scheduled'::match_status",
+      row.kickoffTs ? sqlString(row.kickoffTs) + '::timestamptz' : 'null::timestamptz',
     ]
 
     lines.push('    (' + valuesSql.join(', ') + ')' + (isLast ? ';' : ','))
@@ -167,14 +155,20 @@ function buildContractsSql(rows) {
         ? sqlString(row.kickoffTs) + '::timestamptz'
         : 'null::timestamptz'
       return [
-        `(${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'winner', 10)`,
-        `(${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'goal_difference', 30)`,
-        `(${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'score', 50)`,
+        `(${row.matchNumber}, ${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'winner', 10)`,
+        `(${row.matchNumber}, ${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'goal_difference', 30)`,
+        `(${row.matchNumber}, ${sqlString(row.team1Name)}, ${sqlString(row.team2Name)}, ${kickoffSql}, 'score', 50)`,
       ].join(',\n    ')
     })
     .join(',\n    ')
 
-  const cte = `with match_refs(team1_name, team2_name, kickoff_at, contract_type, blind) as (\n    values\n    ${values}\n  )`
+  const cte =
+    `with match_refs(match_number, team1_name, team2_name, kickoff_at, contract_type, blind) as (\n    values\n    ${values}\n  )\n` +
+    '  , target_matches as (\n' +
+    '    select m.id as match_id, r.contract_type, r.blind\n' +
+    '    from public.matches m\n' +
+    '    join match_refs r on r.match_number = m.match_number\n' +
+    '  )'
 
   lines.push('do $$')
   lines.push('declare')
@@ -185,30 +179,23 @@ function buildContractsSql(rows) {
   lines.push("    raise exception 'No challenge with code=default found';")
   lines.push('  end if;')
   lines.push('')
-  lines.push('  -- Clear existing contracts for these matches')
-  lines.push(`  ${cte}`)
-  lines.push('  delete from public.contracts c')
-  lines.push('  using public.matches m')
-  lines.push('  where c.match_id = m.id')
-  lines.push('    and m.challenge_id = v_challenge_id')
-  lines.push('    and exists (')
-  lines.push('      select 1 from match_refs r')
-  lines.push('      where r.team1_name = m.team1_name')
-  lines.push('        and r.team2_name = m.team2_name')
-  lines.push('        and m.kickoff_at is not distinct from r.kickoff_at')
-  lines.push('    );')
+  lines.push('  -- Clear existing contracts (cascade removes contract_challenge_states)')
+  lines.push('  delete from public.contracts;')
   lines.push('')
   lines.push('  -- Insert default winner/goal_difference/score contracts for each match')
   lines.push(`  ${cte}`)
-  lines.push('  insert into public.contracts (match_id, type, blind, status)')
-  lines.push("  select m.id, r.contract_type::contract_type, r.blind, 'open'::contract_status")
-  lines.push('  from public.matches m')
-  lines.push('  join match_refs r')
-  lines.push('    on r.team1_name = m.team1_name')
-  lines.push('   and r.team2_name = m.team2_name')
-  lines.push('   and m.kickoff_at is not distinct from r.kickoff_at')
-  lines.push('  where m.challenge_id = v_challenge_id')
-  lines.push('  order by m.kickoff_at;')
+  lines.push('  , inserted as (')
+  lines.push('    insert into public.contracts (match_id, type)')
+  lines.push('    select tm.match_id, tm.contract_type::contract_type')
+  lines.push('    from target_matches tm')
+  lines.push('    on conflict (match_id, type) do update set type = excluded.type')
+  lines.push('    returning id as contract_id, match_id, type')
+  lines.push('  )')
+  lines.push('  insert into public.contract_challenge_states (contract_id, challenge_id, blind)')
+  lines.push('  select i.contract_id, v_challenge_id, tm.blind')
+  lines.push('  from inserted i')
+  lines.push('  join target_matches tm on tm.match_id = i.match_id and tm.contract_type::contract_type = i.type')
+  lines.push('  on conflict (contract_id, challenge_id) do update set blind = excluded.blind;')
   lines.push('')
   lines.push('end;')
   lines.push('$$;')

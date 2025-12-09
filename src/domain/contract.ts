@@ -1,7 +1,14 @@
 // src/domain/contract.ts
 // Pure domain logic for contracts (no React, no Supabase)
 
-import type { Match, Contract, ContractType, Bet, ContractSettlementResult } from './types';
+import type {
+  Match,
+  Contract,
+  ContractType,
+  Bet,
+  ContractSettlementResult,
+  ContractChallengeState,
+} from './types';
 import { getGoalDifference, formatMatchScore } from './match';
 
 // ============================================================
@@ -93,28 +100,32 @@ export function calculateContractOutcome(match: Match, contractType: ContractTyp
  * @returns true if contract is settled
  */
 export function isContractSettled(contract: Contract): boolean {
-  return contract.status === 'settled';
+  return contract.settledAt !== null;
 }
 
 /**
  * Check if a contract is locked.
  *
- * @param contract - The contract to check
- * @returns true if contract is locked (not open)
+ * @param state - Challenge-specific contract state
+ * @returns true if contract is locked (lock timestamp set)
  */
-export function isContractLocked(contract: Contract): boolean {
-  return contract.status !== 'open';
+export function isContractLocked(state: ContractChallengeState): boolean {
+  return state.lockedAt !== null;
 }
 
 /**
  * Check if a contract can be settled.
- * A contract can be settled if it's locked but not yet settled or void.
+ * A contract can be settled if it's locked (for this challenge) and not yet settled.
  *
  * @param contract - The contract to check
+ * @param state - Challenge-specific contract state
  * @returns true if contract can be settled
  */
-export function canSettleContract(contract: Contract): boolean {
-  return contract.status === 'locked';
+export function canSettleContract(
+  contract: Contract,
+  state: ContractChallengeState,
+): boolean {
+  return state.lockedAt !== null && contract.settledAt === null;
 }
 
 // ============================================================
@@ -133,15 +144,16 @@ export function canSettleContract(contract: Contract): boolean {
  */
 export function calculateContractPayouts(
   contract: Contract,
+  contractState: ContractChallengeState,
   bets: Bet[],
-  winningOutcome: string
+  winningOutcome: string,
 ): ContractSettlementResult {
   // Filter to only locked/settled bets (exclude cancelled/open)
   const validBets = bets.filter(bet => bet.status === 'locked' || bet.status === 'settled');
 
   // Calculate total pot: blind + sum of all valid stakes
   const totalStakes = validBets.reduce((sum, bet) => sum + bet.stake, 0);
-  const totalPot = contract.blind + totalStakes;
+  const totalPot = contractState.blind + totalStakes;
 
   // Find all bets on the winning outcome
   const winningBets = validBets.filter(bet => bet.outcome === winningOutcome);

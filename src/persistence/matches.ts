@@ -10,12 +10,10 @@ import type { Match, MatchStatus } from '../domain/types';
  */
 interface MatchRow {
   id: string;
-  challenge_id: string;
   match_number: number;
   team1_name: string;
   team2_name: string;
   kickoff_at: string | null;
-  status: MatchStatus;
   score_team1: number | null;
   score_team2: number | null;
   created_at: string;
@@ -28,12 +26,10 @@ interface MatchRow {
 function rowToMatch(row: MatchRow): Match {
   return {
     id: row.id,
-    challengeId: row.challenge_id,
     matchNumber: row.match_number,
     team1Name: row.team1_name,
     team2Name: row.team2_name,
     kickoffAt: row.kickoff_at ? new Date(row.kickoff_at) : null,
-    status: row.status,
     scoreTeam1: row.score_team1,
     scoreTeam2: row.score_team2,
     createdAt: new Date(row.created_at),
@@ -44,15 +40,14 @@ function rowToMatch(row: MatchRow): Match {
 /**
  * Load all matches for a challenge.
  *
- * @param challengeId - The challenge ID
+ * @param _challengeId - The challenge ID (currently unused; matches are global)
  * @returns Array of matches, ordered by match number
  * @throws Error if database query fails
  */
-export async function loadMatches(challengeId: string): Promise<Match[]> {
+export async function loadMatches(_challengeId: string): Promise<Match[]> {
   const { data, error } = await supabase
     .from('matches')
     .select('*')
-    .eq('challenge_id', challengeId)
     .order('match_number', { ascending: true });
 
   if (error) {

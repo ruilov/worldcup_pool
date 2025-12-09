@@ -22,12 +22,10 @@ const TEST_LOCK_TIME_MS = TEST_LOCK_TIME_HOURS * 60 * 60 * 1000;
 function createTestMatch(overrides: Partial<Match> = {}): Match {
   return {
     id: 'match-1',
-    challengeId: 'challenge-1',
     matchNumber: 1,
     team1Name: 'Brazil',
     team2Name: 'Morocco',
     kickoffAt: new Date('2026-06-13T18:00:00-04:00'),
-    status: 'scheduled',
     scoreTeam1: null,
     scoreTeam2: null,
     createdAt: new Date(),
@@ -99,7 +97,7 @@ describe('match domain logic', () => {
   describe('canPlaceBetsOnMatch', () => {
     it('should return true for scheduled match before lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
-      const match = createTestMatch({ kickoffAt: kickoff, status: 'scheduled' });
+      const match = createTestMatch({ kickoffAt: kickoff });
       const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS - 1000);
 
       expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS, now)).toBe(true);
@@ -107,26 +105,14 @@ describe('match domain logic', () => {
 
     it('should return false for scheduled match after lock time', () => {
       const kickoff = new Date('2026-06-13T18:00:00-04:00');
-      const match = createTestMatch({ kickoffAt: kickoff, status: 'scheduled' });
+      const match = createTestMatch({ kickoffAt: kickoff });
       const now = new Date(kickoff.getTime() - TEST_LOCK_TIME_MS + 1000);
 
       expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS, now)).toBe(false);
     });
 
-    it('should return false for in_progress match', () => {
-      const match = createTestMatch({ status: 'in_progress' });
-
-      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
-    });
-
-    it('should return false for completed match', () => {
-      const match = createTestMatch({ status: 'completed' });
-
-      expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
-    });
-
-    it('should return false for void match', () => {
-      const match = createTestMatch({ status: 'void' });
+    it('should return false when no kickoff time is set', () => {
+      const match = createTestMatch({ kickoffAt: null });
 
       expect(canPlaceBetsOnMatch(match, TEST_LOCK_TIME_HOURS)).toBe(false);
     });
@@ -237,35 +223,22 @@ describe('match domain logic', () => {
   });
 
   describe('isMatchFinal', () => {
-    it('should return true for completed match', () => {
-      const match = createTestMatch({ status: 'completed' });
+    it('should return true when scores are set', () => {
+      const match = createTestMatch({ scoreTeam1: 2, scoreTeam2: 1 });
 
       expect(isMatchFinal(match)).toBe(true);
     });
 
-    it('should return true for void match', () => {
-      const match = createTestMatch({ status: 'void' });
-
-      expect(isMatchFinal(match)).toBe(true);
-    });
-
-    it('should return false for scheduled match', () => {
-      const match = createTestMatch({ status: 'scheduled' });
-
-      expect(isMatchFinal(match)).toBe(false);
-    });
-
-    it('should return false for in_progress match', () => {
-      const match = createTestMatch({ status: 'in_progress' });
+    it('should return false when scores are missing', () => {
+      const match = createTestMatch({ scoreTeam1: null, scoreTeam2: null });
 
       expect(isMatchFinal(match)).toBe(false);
     });
   });
 
   describe('canSettleMatch', () => {
-    it('should return true for completed match with score', () => {
+    it('should return true when scores are set', () => {
       const match = createTestMatch({
-        status: 'completed',
         scoreTeam1: 2,
         scoreTeam2: 1,
       });
@@ -273,28 +246,11 @@ describe('match domain logic', () => {
       expect(canSettleMatch(match)).toBe(true);
     });
 
-    it('should return false for completed match without score', () => {
+    it('should return false when scores are missing', () => {
       const match = createTestMatch({
-        status: 'completed',
         scoreTeam1: null,
         scoreTeam2: null,
       });
-
-      expect(canSettleMatch(match)).toBe(false);
-    });
-
-    it('should return false for scheduled match with score', () => {
-      const match = createTestMatch({
-        status: 'scheduled',
-        scoreTeam1: 2,
-        scoreTeam2: 1,
-      });
-
-      expect(canSettleMatch(match)).toBe(false);
-    });
-
-    it('should return false for in_progress match', () => {
-      const match = createTestMatch({ status: 'in_progress' });
 
       expect(canSettleMatch(match)).toBe(false);
     });

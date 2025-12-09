@@ -2,13 +2,6 @@
 // Pure domain types (no React, no Supabase)
 
 // ============================================================
-// Enums (matching database enum types)
-// ============================================================
-
-export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'void';
-
-export type ContractStatus = 'open' | 'locked' | 'settled' | 'void';
-
 export type ContractType = 'winner' | 'goal_difference' | 'score';
 
 export type BetStatus = 'open' | 'locked' | 'settled' | 'cancelled';
@@ -31,17 +24,15 @@ export interface Challenge {
 }
 
 /**
- * A World Cup match within a challenge.
+ * A World Cup match.
  * Represents the real-world game with teams, scheduling, and final scores.
  */
 export interface Match {
   id: string;
-  challengeId: string;
   matchNumber: number; // Official match number (e.g., 1-104)
   team1Name: string;
   team2Name: string;
   kickoffAt: Date | null;
-  status: MatchStatus;
   scoreTeam1: number | null;
   scoreTeam2: number | null;
   createdAt: Date;
@@ -56,14 +47,23 @@ export interface Contract {
   id: string;
   matchId: string;
   type: ContractType;
-  blind: number; // Free Tackles added to pot
-  status: ContractStatus;
   winningOutcome: string | null; // Set when settled (e.g., "Brazil", "2", "2-1")
+  createdAt: Date;
+  settledAt: Date | null;
+}
+
+/**
+ * Challenge-specific contract state (pot inputs and settlement totals).
+ */
+export interface ContractChallengeState {
+  contractId: string;
+  challengeId: string;
+  blind: number; // Free Tackles added to pot
   totalPot: number | null; // Snapshot at settlement
   removedFromGame: number | null; // Tackles removed (rounding or no winners)
-  createdAt: Date;
   lockedAt: Date | null;
-  settledAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**

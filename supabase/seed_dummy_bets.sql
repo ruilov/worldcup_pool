@@ -36,7 +36,6 @@ begin
       row_number() over (order by kickoff_at nulls last, created_at) as match_idx,
       m.id as match_id
     from public.matches m
-    where m.challenge_id = v_challenge_id
     order by kickoff_at nulls last, created_at
     limit 5
   ),

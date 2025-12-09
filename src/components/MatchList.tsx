@@ -51,7 +51,6 @@ export function MatchList({ challengeId }: MatchListProps) {
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderMatch')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderTeams')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderKickoff')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderStatus')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderScore')}</div>
         </div>
 
@@ -67,9 +66,6 @@ export function MatchList({ challengeId }: MatchListProps) {
             <div className={`${styles.cell} ${styles.cellKickoff}`}>
               {match.kickoffDisplay}
             </div>
-            <div className={`${styles.cell} ${styles.cellStatus}`}>
-              <StatusBadge status={match.status} t={t} />
-            </div>
             <div className={`${styles.cell} ${styles.cellScore}`}>
               <ScoreDisplay score={match.scoreDisplay} />
             </div>
@@ -78,16 +74,6 @@ export function MatchList({ challengeId }: MatchListProps) {
       </div>
     </div>
   );
-}
-
-/**
- * Status badge component
- */
-function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
-  const statusClass = getStatusClassName(status);
-  const label = getLocalizedStatus(status, t);
-
-  return <span className={`${styles.statusBadge} ${statusClass}`}>{label}</span>;
 }
 
 /**
@@ -101,40 +87,4 @@ function ScoreDisplay({ score }: { score: string }) {
       {score}
     </span>
   );
-}
-
-/**
- * Get CSS class name for status badge
- */
-function getStatusClassName(status: string): string {
-  switch (status) {
-    case 'scheduled':
-      return styles.scheduled;
-    case 'in_progress':
-      return styles.inProgress;
-    case 'completed':
-      return styles.completed;
-    case 'void':
-      return styles.void;
-    default:
-      return '';
-  }
-}
-
-/**
- * Get localized status label
- */
-function getLocalizedStatus(status: string, t: (key: string) => string): string {
-  switch (status) {
-    case 'scheduled':
-      return t('matches.statusScheduled');
-    case 'in_progress':
-      return t('matches.statusInProgress');
-    case 'completed':
-      return t('matches.statusCompleted');
-    case 'void':
-      return t('matches.statusVoid');
-    default:
-      return status;
-  }
 }

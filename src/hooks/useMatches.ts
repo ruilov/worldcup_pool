@@ -20,7 +20,6 @@ export interface MatchViewModel {
   teamsDisplay: string; // "Brazil vs Morocco"
   kickoffAt: Date | null;
   kickoffDisplay: string; // Formatted kickoff time or "TBD"
-  status: string; // Match status
   scoreDisplay: string; // "2-1" or "?"
   match: Match; // Raw match data for further use
 }
@@ -85,7 +84,6 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
               timeZoneName: 'short',
             })
           : t('matches.kickoffTBD'),
-        status: match.status,
         scoreDisplay: formatMatchScore(match),
         match, // Keep raw data for further use
       }));

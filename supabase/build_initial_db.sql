@@ -9,6 +9,7 @@
 
 drop table if exists public.contract_payouts cascade;
 drop table if exists public.bets cascade;
+drop table if exists public.contract_challenge_states cascade;
 drop table if exists public.contracts cascade;
 drop table if exists public.matches cascade;
 drop table if exists public.challenge_entries cascade;
@@ -16,8 +17,6 @@ drop table if exists public.users cascade;
 drop table if exists public.challenges cascade;
 
 drop type if exists bet_status cascade;
-drop type if exists contract_status cascade;
-drop type if exists match_status cascade;
 drop type if exists contract_type cascade;
 
 ------------------------------------------------------------
@@ -36,24 +35,6 @@ do $$
 begin
   if not exists (select 1 from pg_type where typname = 'contract_type') then
     create type contract_type as enum ('winner', 'goal_difference', 'score');
-  end if;
-end
-$$;
-
--- Status of a match
-do $$
-begin
-  if not exists (select 1 from pg_type where typname = 'match_status') then
-    create type match_status as enum ('scheduled', 'in_progress', 'completed', 'void');
-  end if;
-end
-$$;
-
--- Status of a contract
-do $$
-begin
-  if not exists (select 1 from pg_type where typname = 'contract_status') then
-    create type contract_status as enum ('open', 'locked', 'settled', 'void');
   end if;
 end
 $$;
@@ -105,15 +86,13 @@ create table if not exists public.challenge_entries (
   unique (challenge_id, display_name)
 );
 
--- Matches: real-world games within a challenge
+-- Matches: real-world games, not challenge-bound (contract states carry challenge)
 create table if not exists public.matches (
   id           uuid primary key default gen_random_uuid(),
-  challenge_id uuid not null references public.challenges (id) on delete cascade,
-  match_number integer not null,                -- official match number (e.g., 1-104)
+  match_number integer not null unique,         -- official match number (e.g., 1-104)
   team1_name   text not null,                   -- localized/pretty name
   team2_name   text not null,
   kickoff_at   timestamptz,                     -- optional scheduling info
-  status       match_status not null default 'scheduled',
   score_team1  integer,                         -- canonical score for contracts (may include ET)
   score_team2  integer,
   created_at   timestamptz not null default now(),
@@ -121,23 +100,15 @@ create table if not exists public.matches (
   check (team1_name <> team2_name)
 );
 
-create index if not exists idx_matches_challenge
-  on public.matches (challenge_id);
-
 -- Contracts: per-match markets (Winner / GD / Score)
 create table if not exists public.contracts (
   id              uuid primary key default gen_random_uuid(),
   match_id        uuid not null references public.matches (id) on delete cascade,
-  type            contract_type not null,                 -- for MVP: mostly 'winner'
-  blind           integer not null default 0,             -- free Tackles injected into pot
-  status          contract_status not null default 'open',
-  winning_outcome text,                                   -- set when settled
-  total_pot       integer,                                -- optional snapshot at settlement
-  removed_from_game integer,                              -- Tackles removed (rounding or no winners)
+  type            contract_type not null,   -- for MVP: mostly 'winner'
+  winning_outcome text,                     -- set when settled
   created_at      timestamptz not null default now(),
-  locked_at       timestamptz,
   settled_at      timestamptz,
-  check (blind >= 0)
+  unique (match_id, type)
 );
 
 create index if not exists idx_contracts_match
@@ -145,6 +116,27 @@ create index if not exists idx_contracts_match
 
 create index if not exists idx_contracts_type
   on public.contracts (type);
+
+-- Challenge-specific contract state (blind, pots, totals)
+create table if not exists public.contract_challenge_states (
+  id                uuid primary key default gen_random_uuid(),
+  contract_id       uuid not null references public.contracts (id) on delete cascade,
+  challenge_id      uuid not null references public.challenges (id) on delete cascade,
+  blind             integer not null default 0,
+  total_pot         integer,
+  removed_from_game integer,
+  locked_at         timestamptz,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now(),
+  check (blind >= 0),
+  unique (contract_id, challenge_id)
+);
+
+create index if not exists idx_contract_states_contract
+  on public.contract_challenge_states (contract_id);
+
+create index if not exists idx_contract_states_challenge
+  on public.contract_challenge_states (challenge_id);
 
 -- Bets: stakes on a contract outcome
 create table if not exists public.bets (
@@ -198,6 +190,6 @@ insert into public.challenges (code, name, default_language)
 values ('default', 'World Cup 2026 Default Challenge', 'en')
 on conflict (code) do nothing;
 
--- Note: you can create matches, contracts, users, and challenge entries
+-- Note: you can create matches, contracts, users, challenge entries, and contract states
 -- either via the Supabase UI, additional SQL seed scripts, or from the app.
 -- This file focuses on schema and a single default challenge.

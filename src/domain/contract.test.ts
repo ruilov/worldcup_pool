@@ -12,13 +12,12 @@ import {
   getContractTypeLabel,
   formatContractOutcome,
 } from './contract';
-import type { Match, Contract, Bet } from './types';
+import type { Match, Contract, Bet, ContractChallengeState } from './types';
 
 // Helper to create a test match
 function createTestMatch(overrides: Partial<Match> = {}): Match {
   return {
     id: 'match-1',
-    challengeId: 'challenge-1',
     matchNumber: 1,
     team1Name: 'Brazil',
     team2Name: 'Morocco',
@@ -38,14 +37,26 @@ function createTestContract(overrides: Partial<Contract> = {}): Contract {
     id: 'contract-1',
     matchId: 'match-1',
     type: 'winner',
-    blind: 30,
-    status: 'locked',
     winningOutcome: null,
+    createdAt: new Date(),
+    settledAt: null,
+    ...overrides,
+  };
+}
+
+// Helper to create a test contract state
+function createTestContractState(
+  overrides: Partial<ContractChallengeState> = {},
+): ContractChallengeState {
+  return {
+    contractId: 'contract-1',
+    challengeId: 'challenge-1',
+    blind: 30,
     totalPot: null,
     removedFromGame: null,
+    lockedAt: null,
     createdAt: new Date(),
-    lockedAt: new Date(),
-    settledAt: null,
+    updatedAt: new Date(),
     ...overrides,
   };
 }
@@ -161,45 +172,48 @@ describe('contract domain logic', () => {
 
   describe('contract status helpers', () => {
     it('isContractSettled should return true for settled contract', () => {
-      const contract = createTestContract({ status: 'settled' });
+      const contract = createTestContract({ settledAt: new Date() });
 
       expect(isContractSettled(contract)).toBe(true);
     });
 
     it('isContractSettled should return false for locked contract', () => {
-      const contract = createTestContract({ status: 'locked' });
+      const contract = createTestContract({ settledAt: null });
 
       expect(isContractSettled(contract)).toBe(false);
     });
 
     it('isContractLocked should return true for non-open contract', () => {
-      const contract = createTestContract({ status: 'locked' });
+      const state = createTestContractState({ lockedAt: new Date() });
 
-      expect(isContractLocked(contract)).toBe(true);
+      expect(isContractLocked(state)).toBe(true);
     });
 
     it('isContractLocked should return false for open contract', () => {
-      const contract = createTestContract({ status: 'open' });
+      const state = createTestContractState({ lockedAt: null });
 
-      expect(isContractLocked(contract)).toBe(false);
+      expect(isContractLocked(state)).toBe(false);
     });
 
     it('canSettleContract should return true for locked contract', () => {
-      const contract = createTestContract({ status: 'locked' });
+      const contract = createTestContract({ settledAt: null });
+      const state = createTestContractState({ lockedAt: new Date() });
 
-      expect(canSettleContract(contract)).toBe(true);
+      expect(canSettleContract(contract, state)).toBe(true);
     });
 
     it('canSettleContract should return false for open contract', () => {
-      const contract = createTestContract({ status: 'open' });
+      const contract = createTestContract({ settledAt: null });
+      const state = createTestContractState({ lockedAt: null });
 
-      expect(canSettleContract(contract)).toBe(false);
+      expect(canSettleContract(contract, state)).toBe(false);
     });
 
     it('canSettleContract should return false for already settled contract', () => {
-      const contract = createTestContract({ status: 'settled' });
+      const contract = createTestContract({ settledAt: new Date() });
+      const state = createTestContractState({ lockedAt: new Date() });
 
-      expect(canSettleContract(contract)).toBe(false);
+      expect(canSettleContract(contract, state)).toBe(false);
     });
   });
 
@@ -209,7 +223,8 @@ describe('contract domain logic', () => {
       // Alice bets T$10 on Brazil, Bob T$20, Charlie T$15 = T$45 on Brazil
       // Blind: T$30
       // Total pot: T$90
-      const contract = createTestContract({ blind: 30 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 30 });
       const bets: Bet[] = [
         createTestBet({ id: 'bet-1', challengeEntryId: 'alice', outcome: 'Brazil', stake: 10 }),
         createTestBet({ id: 'bet-2', challengeEntryId: 'bob', outcome: 'Brazil', stake: 20 }),
@@ -217,7 +232,7 @@ describe('contract domain logic', () => {
         createTestBet({ id: 'bet-4', challengeEntryId: 'eve', outcome: 'Morocco', stake: 15 }),
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Brazil');
+      const result = calculateContractPayouts(contract, state, bets, 'Brazil');
 
       expect(result.totalPot).toBe(90); // 30 blind + 60 stakes
       expect(result.payouts.get('alice')).toBe(20); // 10/45 * 90 = 20
@@ -228,13 +243,14 @@ describe('contract domain logic', () => {
     });
 
     it('should handle case where no one bet on winning outcome', () => {
-      const contract = createTestContract({ blind: 30 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 30 });
       const bets: Bet[] = [
         createTestBet({ outcome: 'Brazil', stake: 10 }),
         createTestBet({ outcome: 'Morocco', stake: 15 }),
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Draw');
+      const result = calculateContractPayouts(contract, state, bets, 'Draw');
 
       expect(result.totalPot).toBe(55); // 30 blind + 25 stakes
       expect(result.payouts.size).toBe(0);
@@ -242,14 +258,15 @@ describe('contract domain logic', () => {
     });
 
     it('should round down payouts and track removed Tackles', () => {
-      const contract = createTestContract({ blind: 30 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 30 });
       const bets: Bet[] = [
         createTestBet({ id: 'bet-1', challengeEntryId: 'alice', outcome: 'Brazil', stake: 10 }),
         createTestBet({ id: 'bet-2', challengeEntryId: 'bob', outcome: 'Brazil', stake: 10 }),
         createTestBet({ id: 'bet-3', challengeEntryId: 'charlie', outcome: 'Brazil', stake: 10 }),
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Brazil');
+      const result = calculateContractPayouts(contract, state, bets, 'Brazil');
 
       // Total pot: 30 + 30 = 60
       // Each player should get 60/3 = 20 exactly
@@ -261,14 +278,15 @@ describe('contract domain logic', () => {
     });
 
     it('should handle rounding with uneven division', () => {
-      const contract = createTestContract({ blind: 1 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 1 });
       const bets: Bet[] = [
         createTestBet({ id: 'bet-1', challengeEntryId: 'alice', outcome: 'Brazil', stake: 1 }),
         createTestBet({ id: 'bet-2', challengeEntryId: 'bob', outcome: 'Brazil', stake: 1 }),
         createTestBet({ id: 'bet-3', challengeEntryId: 'charlie', outcome: 'Brazil', stake: 1 }),
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Brazil');
+      const result = calculateContractPayouts(contract, state, bets, 'Brazil');
 
       // Total pot: 1 + 3 = 4
       // Each should get 4/3 = 1.333... → floor = 1
@@ -281,13 +299,14 @@ describe('contract domain logic', () => {
     });
 
     it('should aggregate multiple bets from same player', () => {
-      const contract = createTestContract({ blind: 0 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 0 });
       const bets: Bet[] = [
         createTestBet({ id: 'bet-1', challengeEntryId: 'alice', outcome: 'Brazil', stake: 10 }),
         createTestBet({ id: 'bet-2', challengeEntryId: 'alice', outcome: 'Brazil', stake: 5 }),
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Brazil');
+      const result = calculateContractPayouts(contract, state, bets, 'Brazil');
 
       // Alice has 15 total stake, pot is 15, she should get all 15
       expect(result.totalPot).toBe(15);
@@ -296,14 +315,15 @@ describe('contract domain logic', () => {
     });
 
     it('should only count locked/settled bets, not cancelled/open', () => {
-      const contract = createTestContract({ blind: 10 });
+      const contract = createTestContract();
+      const state = createTestContractState({ blind: 10 });
       const bets: Bet[] = [
         createTestBet({ outcome: 'Brazil', stake: 10, status: 'locked' }),
         createTestBet({ outcome: 'Brazil', stake: 20, status: 'cancelled' }), // should be ignored
         createTestBet({ outcome: 'Brazil', stake: 30, status: 'open' }), // should be ignored
       ];
 
-      const result = calculateContractPayouts(contract, bets, 'Brazil');
+      const result = calculateContractPayouts(contract, state, bets, 'Brazil');
 
       // Only the locked bet counts: 10 blind + 10 stake = 20 total
       expect(result.totalPot).toBe(20);

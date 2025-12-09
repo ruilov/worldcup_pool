@@ -111,12 +111,10 @@ describe('formatMatchTeamsLocalized', () => {
 
     const match: Match = {
       id: '123',
-      challengeId: 'challenge-1',
       matchNumber: 6,
       team1Name: 'Brazil',
       team2Name: 'Morocco',
       kickoffAt: new Date('2026-06-13T18:00:00-04:00'),
-      status: 'scheduled',
       scoreTeam1: null,
       scoreTeam2: null,
       createdAt: new Date(),
@@ -134,12 +132,10 @@ describe('formatMatchTeamsLocalized', () => {
 
     const match: Match = {
       id: '123',
-      challengeId: 'challenge-1',
       matchNumber: 89,
       team1Name: 'Winner of Match 74',
       team2Name: 'Group A winner',
       kickoffAt: new Date('2026-07-04T17:00:00-04:00'),
-      status: 'scheduled',
       scoreTeam1: null,
       scoreTeam2: null,
       createdAt: new Date(),

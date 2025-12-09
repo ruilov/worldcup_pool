@@ -1,7 +1,7 @@
 // src/domain/match.ts
 // Pure domain logic for matches (no React, no Supabase)
 
-import type { Match, MatchStatus } from './types';
+import type { Match } from './types';
 
 // ============================================================
 // Time and Locking Logic
@@ -51,7 +51,12 @@ export function isMatchLocked(match: Match, lockTimeHours: number, now: Date = n
  * @returns true if bets can be placed, false otherwise
  */
 export function canPlaceBetsOnMatch(match: Match, lockTimeHours: number, now: Date = new Date()): boolean {
-  return match.status === 'scheduled' && !isMatchLocked(match, lockTimeHours, now);
+  const lockTime = getMatchLockTime(match, lockTimeHours);
+  if (!lockTime) {
+    // Without a kickoff time we can't safely accept bets.
+    return false;
+  }
+  return now < lockTime;
 }
 
 // ============================================================
@@ -119,24 +124,24 @@ export function hasScore(match: Match): boolean {
 }
 
 /**
- * Check if a match is in a final state (completed or void).
+ * Check if a match is in a final state (no separate status tracking; relies on scores).
  *
  * @param match - The match to check
- * @returns true if match is completed or void
+ * @returns true if match has a score
  */
 export function isMatchFinal(match: Match): boolean {
-  return match.status === 'completed' || match.status === 'void';
+  return hasScore(match);
 }
 
 /**
  * Check if a match can be settled.
- * A match can be settled if it's completed and has a score.
+ * A match can be settled if it has a recorded score.
  *
  * @param match - The match to check
  * @returns true if match can be settled
  */
 export function canSettleMatch(match: Match): boolean {
-  return match.status === 'completed' && hasScore(match);
+  return hasScore(match);
 }
 
 // ============================================================
@@ -149,9 +154,7 @@ export function canSettleMatch(match: Match): boolean {
  * @param match - The match
  * @returns Status label
  */
-export function getMatchStatusLabel(match: Match): MatchStatus {
-  return match.status;
-}
+// Status labels removed; match status no longer tracked.
 
 /**
  * Format match teams for display.
