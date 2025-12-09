@@ -116,7 +116,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
   opacity: 0;
   transition: opacity var(--transition-base);
   pointer-events: none;
@@ -124,7 +124,6 @@
 
 .matchRow:hover {
   background-color: var(--border-medium);
-  transform: translateX(2px);
 }
 
 .matchRow:hover::before {
@@ -132,7 +131,7 @@
 }
 
 .matchRow:hover .cell {
-  background: linear-gradient(90deg, var(--bg-primary) 0%, var(--bg-hover) 50%, var(--bg-primary) 100%);
+  background: var(--bg-tertiary);
 }
 
 /* Cells */
