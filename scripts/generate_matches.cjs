@@ -3,8 +3,8 @@
 //   node scripts/generate_matches_sql_from_csv.cjs
 //
 // This reads matches.csv and writes two files:
-//   - supabase/seed_matches_from_csv.sql
-//   - supabase/seed_contracts_from_csv.sql
+//   - supabase/populate_matches.sql
+//   - supabase/populate_contracts.sql
 //
 // Then open the generated SQL files in an editor, copy, and run them
 // in the Supabase SQL editor.
@@ -19,11 +19,8 @@ const path = require('path')
 
 const csvPath = path.join(__dirname, '..', 'matches.csv')
 const supabaseDir = path.join(__dirname, '..', 'supabase')
-const matchesOutputPath = path.join(supabaseDir, 'seed_matches_from_csv.sql')
-const contractsOutputPath = path.join(
-  supabaseDir,
-  'seed_contracts_from_csv.sql',
-)
+const matchesOutputPath = path.join(supabaseDir, 'populate_matches.sql')
+const contractsOutputPath = path.join(supabaseDir, 'populate_contracts.sql')
 
 if (!fs.existsSync(csvPath)) {
   console.error(`CSV file not found: ${csvPath}`)
