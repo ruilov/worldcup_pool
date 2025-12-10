@@ -1,8 +1,10 @@
 // src/components/MatchList.tsx
 // Match list component with sports-stats terminal design
 
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMatches } from '../hooks/useMatches';
+import { updateMatchScore } from '../persistence/matches';
 import styles from './MatchList.module.css';
 
 interface MatchListProps {
@@ -11,7 +13,71 @@ interface MatchListProps {
 
 export function MatchList({ challengeId }: MatchListProps) {
   const { t } = useTranslation();
-  const { matches, loading, error } = useMatches(challengeId);
+  const { matches, loading, error, refetch } = useMatches(challengeId);
+  const [scoreEdits, setScoreEdits] = useState<Record<string, { team1: string; team2: string }>>(
+    {},
+  );
+  const [updating, setUpdating] = useState<Record<string, boolean>>({});
+  const [inlineErrors, setInlineErrors] = useState<Record<string, string>>({});
+
+  // Reset editable scores when matches change
+  useEffect(() => {
+    const next: Record<string, { team1: string; team2: string }> = {};
+    matches.forEach((m) => {
+      next[m.id] = {
+        team1: m.match.scoreTeam1?.toString() ?? '',
+        team2: m.match.scoreTeam2?.toString() ?? '',
+      };
+    });
+    setScoreEdits(next);
+    setInlineErrors({});
+  }, [matches]);
+
+  const handleSettle = async (matchId: string) => {
+    const edit = scoreEdits[matchId] ?? { team1: '', team2: '' };
+    const parseScore = (raw: string) => {
+      const trimmed = raw.trim();
+      if (trimmed === '') return null;
+      const parsed = Number(trimmed);
+      if (!Number.isInteger(parsed)) return Number.NaN;
+      return parsed < 0 ? Number.NaN : parsed;
+    };
+
+    const parsedTeam1 = parseScore(edit.team1);
+    const parsedTeam2 = parseScore(edit.team2);
+
+    if (Number.isNaN(parsedTeam1) || Number.isNaN(parsedTeam2)) {
+      setInlineErrors((prev) => ({
+        ...prev,
+        [matchId]: t('matches.invalidScore'),
+      }));
+      return;
+    }
+
+    setInlineErrors((prev) => {
+      const next = { ...prev };
+      delete next[matchId];
+      return next;
+    });
+
+    setUpdating((prev) => ({ ...prev, [matchId]: true }));
+    try {
+      await updateMatchScore(matchId, parsedTeam1, parsedTeam2);
+      await refetch();
+    } catch (err) {
+      setInlineErrors((prev) => ({
+        ...prev,
+        [matchId]:
+          err instanceof Error ? err.message : t('matches.failedToUpdateScore'),
+      }));
+    } finally {
+      setUpdating((prev) => {
+        const next = { ...prev };
+        delete next[matchId];
+        return next;
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -52,6 +118,7 @@ export function MatchList({ challengeId }: MatchListProps) {
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderTeams')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderKickoff')}</div>
           <div className={styles.gridHeaderCell}>{t('matches.tableHeaderScore')}</div>
+          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderActions')}</div>
         </div>
 
         {/* Match rows */}
@@ -67,7 +134,38 @@ export function MatchList({ challengeId }: MatchListProps) {
               {match.kickoffDisplay}
             </div>
             <div className={`${styles.cell} ${styles.cellScore}`}>
-              <ScoreDisplay score={match.scoreDisplay} />
+              <ScoreInputs
+                value={scoreEdits[match.id]}
+                placeholder={t('matches.scoreInputPlaceholder')}
+                ariaLabelTeam1={t('matches.scoreInputTeam1Aria', {
+                  team: match.match.team1Name,
+                })}
+                ariaLabelTeam2={t('matches.scoreInputTeam2Aria', {
+                  team: match.match.team2Name,
+                })}
+                onChange={(side, value) =>
+                  setScoreEdits((prev) => ({
+                    ...prev,
+                    [match.id]: {
+                      ...(prev[match.id] ?? { team1: '', team2: '' }),
+                      [side]: value,
+                    },
+                  }))
+                }
+              />
+              {inlineErrors[match.id] ? (
+                <div className={styles.inlineError}>{inlineErrors[match.id]}</div>
+              ) : null}
+            </div>
+            <div className={`${styles.cell} ${styles.cellActions}`}>
+              <button
+                className={styles.actionButton}
+                type="button"
+                onClick={() => handleSettle(match.id)}
+                disabled={updating[match.id]}
+              >
+                {updating[match.id] ? t('matches.updatingScore') : t('matches.settleContracts')}
+              </button>
             </div>
           </div>
         ))}
@@ -76,15 +174,47 @@ export function MatchList({ challengeId }: MatchListProps) {
   );
 }
 
-/**
- * Score display component
- */
-function ScoreDisplay({ score }: { score: string }) {
-  const isPlaceholder = score === '?' || score === '-';
+type ScoreInputsProps = {
+  value?: { team1: string; team2: string };
+  placeholder: string;
+  ariaLabelTeam1: string;
+  ariaLabelTeam2: string;
+  onChange: (side: 'team1' | 'team2', value: string) => void;
+};
+
+function ScoreInputs({
+  value,
+  placeholder,
+  ariaLabelTeam1,
+  ariaLabelTeam2,
+  onChange,
+}: ScoreInputsProps) {
+  const team1 = value?.team1 ?? '';
+  const team2 = value?.team2 ?? '';
 
   return (
-    <span className={isPlaceholder ? styles.scorePlaceholder : styles.score}>
-      {score}
-    </span>
+    <div className={styles.scoreInputs}>
+      <input
+        className={styles.scoreInput}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        aria-label={ariaLabelTeam1}
+        placeholder={placeholder}
+        value={team1}
+        onChange={(e) => onChange('team1', e.target.value)}
+      />
+      <span className={styles.scoreSeparator}>-</span>
+      <input
+        className={styles.scoreInput}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        aria-label={ariaLabelTeam2}
+        placeholder={placeholder}
+        value={team2}
+        onChange={(e) => onChange('team2', e.target.value)}
+      />
+    </div>
   );
 }

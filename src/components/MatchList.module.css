@@ -68,7 +68,7 @@
 /* Grid header */
 .gridHeader {
   display: grid;
-  grid-template-columns: 60px 1fr 180px 100px;
+  grid-template-columns: 60px 1fr 180px 200px 140px;
   gap: 1px;
   background-color: var(--border-subtle);
   font-size: var(--text-xs);
@@ -104,7 +104,7 @@
 /* Match row */
 .matchRow {
   display: grid;
-  grid-template-columns: 60px 1fr 180px 100px;
+  grid-template-columns: 60px 1fr 180px 200px 140px;
   gap: 1px;
   background-color: var(--border-subtle);
   transition: all var(--transition-base);
@@ -175,10 +175,8 @@
 
 .cellScore {
   justify-content: center;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-base);
-  font-weight: 600;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 
 /* Score display */
@@ -193,6 +191,81 @@
   color: var(--text-muted);
   font-weight: 400;
   opacity: 0.5;
+}
+
+.scoreInputs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  justify-content: center;
+}
+
+.scoreInput {
+  width: 72px;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.scoreInput::-webkit-outer-spin-button,
+.scoreInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.scoreInput[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.scoreInput:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+}
+
+.scoreSeparator {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.cellActions {
+  justify-content: center;
+}
+
+.actionButton {
+  padding: 10px 14px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-mint));
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--bg-primary);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.actionButton:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(6, 182, 212, 0.25);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inlineError {
+  margin-top: 4px;
+  color: var(--status-live);
+  font-size: var(--text-xs);
 }
 
 /* Loading and error states */

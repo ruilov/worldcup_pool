@@ -2,7 +2,7 @@
 // Supabase persistence for matches
 
 import { supabase } from '../supabaseClient';
-import type { Match, MatchStatus } from '../domain/types';
+import type { Match } from '../domain/types';
 
 /**
  * Database row type for matches table.
@@ -82,4 +82,30 @@ export async function loadMatch(matchId: string): Promise<Match | null> {
   }
 
   return rowToMatch(data);
+}
+
+/**
+ * Update the score for a match.
+ *
+ * @param matchId - Match ID
+ * @param scoreTeam1 - Goals for team 1 (null to clear)
+ * @param scoreTeam2 - Goals for team 2 (null to clear)
+ */
+export async function updateMatchScore(
+  matchId: string,
+  scoreTeam1: number | null,
+  scoreTeam2: number | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from('matches')
+    .update({
+      score_team1: scoreTeam1,
+      score_team2: scoreTeam2,
+    })
+    .eq('id', matchId);
+
+  if (error) {
+    console.error('Error updating match score:', error);
+    throw new Error(`Failed to update match score: ${error.message}`);
+  }
 }
