@@ -141,8 +141,8 @@ function AuthPage({ navigate }: NavigationProps) {
 
   return (
     <section className={styles.page}>
-      <h2>{t('auth.heading', { defaultValue: 'Sign in with a magic link' })}</h2>
-      <p>{t('auth.description', { defaultValue: 'Enter your email to get a sign-in link.' })}</p>
+      <h2>{t('auth.heading', { defaultValue: 'Sign in with an email link' })}</h2>
+      <p>{t('auth.description', { defaultValue: 'Enter your email and we will send you a one-time sign-in link.' })}</p>
       <form className={styles.form} onSubmit={handleSubmit}>
         <label className={styles.label} htmlFor="auth-email">
           {t('auth.emailLabel', { defaultValue: 'Email' })}
@@ -162,7 +162,7 @@ function AuthPage({ navigate }: NavigationProps) {
         <button className={styles.primaryButton} type="submit" disabled={!email || submitting}>
           {submitting
             ? t('auth.sending', { defaultValue: 'Sending…' })
-            : t('auth.sendLink', { defaultValue: 'Send magic link' })}
+            : t('auth.sendLink', { defaultValue: 'Send sign-in link' })}
         </button>
       </form>
     </section>
@@ -197,10 +197,10 @@ function LinkSentPage({ navigate }: NavigationProps) {
       <p>
         {email
           ? t('auth.linkSentDescriptionEmail', {
-              defaultValue: 'Check your email for the magic link we sent to {{email}}.',
+              defaultValue: 'Check your email for the sign-in link we sent to {{email}}.',
               email,
             })
-          : t('auth.linkSentDescription', { defaultValue: 'Check your email for the magic link.' })}
+          : t('auth.linkSentDescription', { defaultValue: 'Check your email for the sign-in link.' })}
       </p>
       {message ? <div className={styles.success}>{message}</div> : null}
       {error ? <div className={styles.error}>{error}</div> : null}
