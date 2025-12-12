@@ -134,6 +134,100 @@
   border-color: rgba(239, 68, 68, 0.2);
 }
 
+.success {
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  background-color: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.main {
+  margin-top: var(--space-xl);
+}
+
+.page {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+}
+
+.page h2 {
+  margin-top: 0;
+  margin-bottom: var(--space-md);
+}
+
+.page p {
+  margin-top: 0;
+  margin-bottom: var(--space-lg);
+  color: var(--text-secondary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.label {
+  font-weight: 600;
+}
+
+.input {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-medium);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.input:disabled {
+  opacity: 0.7;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+.primaryButton,
+.secondaryButton {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.primaryButton {
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-mint));
+  color: var(--bg-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(6, 182, 212, 0.25);
+}
+
+.secondaryButton {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+
+.secondaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app {
