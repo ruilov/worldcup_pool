@@ -7,7 +7,7 @@ import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { requestMagicLink, verifyMagicLink } from './auth/magicLinks';
 import styles from './App.module.css';
 
-const KNOWN_PATHS = new Set(['/auth', '/auth/link-sent', '/auth/verify', '/challenges', '/account', '/500']);
+const KNOWN_PATHS = new Set(['/', '/auth', '/auth/link-sent', '/auth/verify', '/challenges', '/account', '/500']);
 const BASE_PREFIX = (import.meta.env.BASE_URL ?? '/').replace(/\/+$/, '') || '/';
 
 function stripBase(pathname: string): string {
@@ -77,6 +77,8 @@ type RouteSwitchProps = {
 
 function RouteSwitch({ path, navigate }: RouteSwitchProps) {
   switch (path) {
+    case '/':
+      return null;
     case '/auth':
       return <AuthPage navigate={navigate} />;
     case '/auth/link-sent':
@@ -340,12 +342,21 @@ function AppShell() {
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
-  // Redirect unknown routes to /auth or /challenges based on auth
+  // Redirect "/" after auth load
   useEffect(() => {
+    if (authLoading) return;
+    if (path === '/') {
+      navigate(user ? '/challenges' : '/auth');
+    }
+  }, [authLoading, navigate, path, user]);
+
+  // Redirect unknown routes to /auth or /challenges based on auth (wait for auth to load)
+  useEffect(() => {
+    if (authLoading) return;
     if (!KNOWN_PATHS.has(path)) {
       navigate(user ? '/challenges' : '/auth');
     }
-  }, [navigate, path, user]);
+  }, [authLoading, navigate, path, user]);
 
   return (
     <div className={styles.app}>
