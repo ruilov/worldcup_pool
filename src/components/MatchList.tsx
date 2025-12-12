@@ -107,67 +107,62 @@ export function MatchList({ challengeId }: MatchListProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h2 className={styles.heading}>{t('matches.heading')}</h2>
-      </div>
-
-      <div className={styles.grid}>
-        {/* Grid header */}
-        <div className={styles.gridHeader}>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderMatch')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderTeams')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderKickoff')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderScore')}</div>
-          <div className={styles.gridHeaderCell}>{t('matches.tableHeaderActions')}</div>
-        </div>
-
-        {/* Match rows */}
+      <div className={styles.list}>
         {matches.map((match) => (
-          <div key={match.id} className={styles.matchRow}>
-            <div className={`${styles.cell} ${styles.cellMatch}`}>
-              {match.matchNumberDisplay}
+          <article key={match.id} className={styles.card}>
+            <div className={styles.cardHeader}>
+              <div className={styles.meta}>
+                <span className={styles.matchNumber}>{match.matchNumberDisplay}</span>
+                <div className={styles.teams}>{match.teamsDisplay}</div>
+              </div>
+              <div className={styles.kickoffBlock}>
+                <span className={styles.label}>{t('matches.tableHeaderKickoff')}</span>
+                <span className={styles.kickoff}>{match.kickoffDisplay}</span>
+              </div>
             </div>
-            <div className={`${styles.cell} ${styles.cellTeams}`}>
-              {match.teamsDisplay}
+
+            <div className={styles.cardBody}>
+              <div className={styles.scoreSection}>
+                <div className={styles.sectionHeader}>
+                  <span className={styles.label}>{t('matches.tableHeaderScore')}</span>
+                  <span className={styles.scoreHint}>{t('matches.scoreInputPlaceholder')}</span>
+                </div>
+                <ScoreInputs
+                  value={scoreEdits[match.id]}
+                  placeholder={t('matches.scoreInputPlaceholder')}
+                  ariaLabelTeam1={t('matches.scoreInputTeam1Aria', {
+                    team: match.match.team1Name,
+                  })}
+                  ariaLabelTeam2={t('matches.scoreInputTeam2Aria', {
+                    team: match.match.team2Name,
+                  })}
+                  onChange={(side, value) =>
+                    setScoreEdits((prev) => ({
+                      ...prev,
+                      [match.id]: {
+                        ...(prev[match.id] ?? { team1: '', team2: '' }),
+                        [side]: value,
+                      },
+                    }))
+                  }
+                />
+                {inlineErrors[match.id] ? (
+                  <div className={styles.inlineError}>{inlineErrors[match.id]}</div>
+                ) : null}
+              </div>
+
+              <div className={styles.actions}>
+                <button
+                  className={styles.primaryAction}
+                  type="button"
+                  onClick={() => handleSettle(match.id)}
+                  disabled={updating[match.id]}
+                >
+                  {updating[match.id] ? t('matches.updatingScore') : t('matches.settleContracts')}
+                </button>
+              </div>
             </div>
-            <div className={`${styles.cell} ${styles.cellKickoff}`}>
-              {match.kickoffDisplay}
-            </div>
-            <div className={`${styles.cell} ${styles.cellScore}`}>
-              <ScoreInputs
-                value={scoreEdits[match.id]}
-                placeholder={t('matches.scoreInputPlaceholder')}
-                ariaLabelTeam1={t('matches.scoreInputTeam1Aria', {
-                  team: match.match.team1Name,
-                })}
-                ariaLabelTeam2={t('matches.scoreInputTeam2Aria', {
-                  team: match.match.team2Name,
-                })}
-                onChange={(side, value) =>
-                  setScoreEdits((prev) => ({
-                    ...prev,
-                    [match.id]: {
-                      ...(prev[match.id] ?? { team1: '', team2: '' }),
-                      [side]: value,
-                    },
-                  }))
-                }
-              />
-              {inlineErrors[match.id] ? (
-                <div className={styles.inlineError}>{inlineErrors[match.id]}</div>
-              ) : null}
-            </div>
-            <div className={`${styles.cell} ${styles.cellActions}`}>
-              <button
-                className={styles.actionButton}
-                type="button"
-                onClick={() => handleSettle(match.id)}
-                disabled={updating[match.id]}
-              >
-                {updating[match.id] ? t('matches.updatingScore') : t('matches.settleContracts')}
-              </button>
-            </div>
-          </div>
+          </article>
         ))}
       </div>
     </div>

@@ -41,11 +41,12 @@ type HeaderProps = {
 
 function Header({ currentLang, onLanguageChange, onSignOut, isAuthenticated }: HeaderProps) {
   const { t } = useTranslation();
+  const logoSrc = `${import.meta.env.BASE_URL ?? '/'}logo.png`;
 
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
-        <span className={styles.logoIcon}>⚽</span>
+        <img className={styles.logoImg} src={logoSrc} alt={t('common.logoAlt', { defaultValue: 'App logo' })} />
         <div>
           <h1 className={styles.logoText}>
             {t('common.appName')}
@@ -258,9 +259,27 @@ function ChallengesPage() {
   }
 
   return (
-    <section className={styles.page}>
-      <h2>{t('matches.heading')}</h2>
-      <MatchList challengeId={challenge.id} />
+    <section className={`${styles.page} ${styles.challengePage}`}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionHeading}>
+          <p className={styles.eyebrow}>{t('matches.challengeEyebrow')}</p>
+          <h2 className={styles.pageTitle}>{challenge.name}</h2>
+          <p className={styles.pageLead}>{t('matches.challengeLead')}</p>
+        </div>
+        <div className={styles.metaChips}>
+          <span className={styles.metaChip}>{t('matches.challengeCodeLabel', { code: challenge.code })}</span>
+          <span className={styles.metaChip}>
+            {t('matches.defaultLanguageLabel', { language: challenge.defaultLanguage.toUpperCase() })}
+          </span>
+          <span className={styles.metaChip}>
+            {t('matches.lockTimeLabel', { hours: challenge.lockTimeHours })}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.sectionCard}>
+        <MatchList challengeId={challenge.id} />
+      </div>
     </section>
   );
 }

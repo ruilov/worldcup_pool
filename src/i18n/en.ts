@@ -4,6 +4,7 @@ const en = {
     loading: 'Loading…',
     save: 'Save',
     language: 'Language',
+    logoAlt: 'World Cup Pool logo',
   },
   settings: {
     heading: 'World Cup Pool (Prototype)',
@@ -49,6 +50,11 @@ const en = {
   },
   matches: {
     heading: 'Matches',
+    challengeEyebrow: 'Challenge',
+    challengeLead: 'Manage fixtures, enter scores, and settle contracts.',
+    challengeCodeLabel: 'Code: {{code}}',
+    defaultLanguageLabel: 'Language: {{language}}',
+    lockTimeLabel: 'Bets lock {{hours}}h before kickoff',
     loading: 'Loading matches...',
     loadingChallenge: 'Loading challenge...',
     errorPrefix: 'Error',

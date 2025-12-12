@@ -4,6 +4,7 @@ const pt = {
     loading: 'Carregando…',
     save: 'Salvar',
     language: 'Idioma',
+    logoAlt: 'Logo do Bolão da Copa',
   },
   settings: {
     heading: 'Bolão da Copa (Protótipo)',
@@ -49,6 +50,11 @@ const pt = {
   },
   matches: {
     heading: 'Partidas',
+    challengeEyebrow: 'Desafio',
+    challengeLead: 'Gerencie partidas, preencha placares e encerre contratos.',
+    challengeCodeLabel: 'Código: {{code}}',
+    defaultLanguageLabel: 'Idioma: {{language}}',
+    lockTimeLabel: 'Apostas fecham {{hours}}h antes do início',
     loading: 'Carregando partidas...',
     loadingChallenge: 'Carregando desafio...',
     errorPrefix: 'Erro',
