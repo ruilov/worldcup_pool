@@ -1,0 +1,49 @@
+
+Public
+
+/ - home
+/about - rules, organizer guide, faq
+/404 - catch-all
+
+Auth
+
+/auth – email input to request a magic link; lightweight copy about how it works and a “send link” action.
+/auth/link-sent – confirmation + resend option; explain to check email;
+/auth/verify – handler for the magic-link callback (reads token, completes sign-in, shows spinner/inline error, then routes home).
+/challenges – good home for the authed shell. List challenges the user is in; can later link into details.
+/account – shows current email, offers “log out on this device” and optionally “log out on all devices”.
+/500 – friendly screen for invalid/expired link or network/auth errors, with a path back to request a new link.
+
+
+Global (logged in)
+
+Create challenge (wizard) — /challenges/new
+Invite link entry — /i/:inviteCode
+Account/profile (display name + language) — /account
+
+Challenge:
+Challenge dashboard — /c/:challengeId
+Matches list — /c/:challengeId/matches
+19. Match detail (bet + reveal + settlement) — /c/:challengeId/matches/:matchId
+21. Standings — /c/:challengeId/standings
+
+Player
+My bets — /c/:challengeId/my-bets
+
+Organizer
+Admin dashboard — /c/:challengeId/admin
+Invites — /c/:challengeId/admin/invites
+Players — /c/:challengeId/admin/players
+Settings — /c/:challengeId/admin/settings
+Audit log — /c/:challengeId/admin/audit (v2)
+Export — /c/:challengeId/admin/export (v2)
+Finalize — /c/:challengeId/admin/finalize (v2)
+
+Edge/error
+
+Something went wrong — /500 (optional)
+
+Two extra pages you’ll probably want with magic links
+
+“Request a new link” (resend) — /auth/resend (or built into /auth + /auth/check-email)
+“Invite requires email” (if you want the invite to bind to an email before account exists) — can be a state inside /i/:inviteCode
