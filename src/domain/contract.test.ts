@@ -22,7 +22,6 @@ function createTestMatch(overrides: Partial<Match> = {}): Match {
     team1Name: 'Brazil',
     team2Name: 'Morocco',
     kickoffAt: new Date('2026-06-13T18:00:00-04:00'),
-    status: 'completed',
     scoreTeam1: 2,
     scoreTeam2: 1,
     createdAt: new Date(),

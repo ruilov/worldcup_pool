@@ -18,8 +18,6 @@ export async function requestMagicLink(email: string): Promise<{ error?: string 
     email,
     options: {
       emailRedirectTo: redirectTo,
-      // Force PKCE so we get a code_verifier stored client-side
-      flowType: 'pkce',
     },
   });
   return { error: error?.message };

@@ -61,7 +61,6 @@ export function useMatches(challengeId: string | null): UseMatchesResult {
       const rawMatches = await loadMatches(challengeId);
 
       // Transform to view models using domain logic
-      const now = new Date();
       const viewModels: MatchViewModel[] = rawMatches.map((match) => ({
         id: match.id,
         matchNumber: match.matchNumber,
