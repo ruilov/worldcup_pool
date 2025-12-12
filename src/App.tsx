@@ -35,9 +35,11 @@ function App() {
 type HeaderProps = {
   currentLang: string;
   onLanguageChange: (lang: string) => void;
+  onSignOut?: () => void;
+  isAuthenticated: boolean;
 };
 
-function Header({ currentLang, onLanguageChange }: HeaderProps) {
+function Header({ currentLang, onLanguageChange, onSignOut, isAuthenticated }: HeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -66,6 +68,14 @@ function Header({ currentLang, onLanguageChange }: HeaderProps) {
           <option value="pt">Português</option>
         </select>
       </div>
+
+      {isAuthenticated && onSignOut ? (
+        <div className={styles.authActions}>
+          <button className={styles.secondaryButton} type="button" onClick={onSignOut}>
+            {t('account.signOut', { defaultValue: 'Sign out' })}
+          </button>
+        </div>
+      ) : null}
     </header>
   );
 }
@@ -315,7 +325,7 @@ export default App
  */
 function AppShell() {
   const { i18n } = useTranslation();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [path, setPath] = useState<string>(() => stripBase(window.location.pathname));
 
   const handleLanguageChange = (lang: string) => {
@@ -364,6 +374,8 @@ function AppShell() {
         <Header
           currentLang={i18n.language}
           onLanguageChange={handleLanguageChange}
+          onSignOut={() => signOut()}
+          isAuthenticated={!!user}
         />
 
         <main className={styles.main}>
